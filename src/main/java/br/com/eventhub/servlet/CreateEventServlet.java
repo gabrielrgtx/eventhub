@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -40,8 +41,12 @@ public class CreateEventServlet extends HttpServlet {
         endereco.setCep(req.getParameter("cep"));
         evento.setEndereco(endereco);
         if (id == null || id.isEmpty()) {
-            User criador = new User();
-            criador.setId(1);
+            HttpSession session = req.getSession(false);
+            User criador = session == null ? null : (User) session.getAttribute("usuarioLogado");
+            if (criador == null) {
+                resp.sendRedirect(req.getContextPath() + "/login");
+                return;
+            }
             evento.setCriador(criador);
             new EventDao().createEvent(evento);
         } else {
