@@ -130,6 +130,42 @@ public class EventDao {
         }
     }
 
+        public void cancelEventById(int id) {
+        String SQL = "UPDATE EVENTO SET CANCELADO = TRUE WHERE ID = ?";
+        try {
+            Connection connection = ConnectionFactory.getConnection();
+            System.out.println("success in database connection");
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            preparedStatement.setInt(1, id);
+            preparedStatement.execute();
+            System.out.println("success in cancel event");
+            connection.close();
+        } catch (Exception e) {
+            System.out.println("fail in database connection");
+        }
+    }
+
+    public int countByCriador(int userId) {
+        String SQL = "SELECT COUNT(*) FROM EVENTO WHERE CRIADOR_ID = ?";
+        try {
+            Connection connection = ConnectionFactory.getConnection();
+            System.out.println("success in database connection");
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            preparedStatement.setInt(1, userId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            int total = 0;
+            if (resultSet.next()) {
+                total = resultSet.getInt(1);
+            }
+            System.out.println("success in count events by criador");
+            connection.close();
+            return total;
+        } catch (Exception e) {
+            System.out.println("fail in database connection");
+            return 0;
+        }
+    }
+
     private Event montarEvento(ResultSet resultSet) throws SQLException {
         Event evento = new Event();
         evento.setId(resultSet.getInt("ID"));
