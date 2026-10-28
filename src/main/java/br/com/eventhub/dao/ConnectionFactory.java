@@ -1,20 +1,24 @@
 package br.com.eventhub.dao;
 
+import org.apache.commons.dbcp2.BasicDataSource;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class ConnectionFactory {
 
-    private static final String URL = "jdbc:h2:~/test";
-    private static final String USUARIO = "sa";
-    private static final String SENHA = "sa";
+    private static final BasicDataSource dataSource = new BasicDataSource();
 
-    public static Connection getConnection() {
-        try {
-            return DriverManager.getConnection(URL, USUARIO, SENHA);
-        } catch (SQLException e) {
-            throw new RuntimeException("Falha ao conectar no banco", e);
-        }
+    static {
+        dataSource.setUrl("jdbc:h2:~/test");
+        dataSource.setUsername("sa");
+        dataSource.setPassword("sa");
+        dataSource.setMinIdle(5);
+        dataSource.setMaxIdle(10);
+        dataSource.setMaxTotal(50);
+    }
+
+    public static Connection getConnection() throws SQLException {
+        return dataSource.getConnection();
     }
 }
