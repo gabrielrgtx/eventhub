@@ -16,9 +16,13 @@
         <c:forEach var="evento" items="${eventos}">
             <tr>
                 <td>${evento.id}</td>
-                <td>${evento.nome}</td>
+                <td>${evento.nome}${evento.cancelado ? ' (cancelado)' : ''}</td>
                 <td>
-                    <a href="index.jsp?id=${evento.id}&name=${evento.nome}">Editar</a>
+                    <a href="/editar-evento?id=${evento.id}">Editar</a>
+                    <form action="/cancelar-evento" method="post">
+                        <input type="hidden" name="id" value="${evento.id}">
+                        <button type="submit">Cancelar</button>
+                    </form>
                     <form action="/delete-event" method="post">
                         <input type="hidden" id="id" name="id" value="${evento.id}">
                         <button type="submit">Delete</button>
@@ -27,5 +31,6 @@
             </tr>
         </c:forEach>
     </table>
+    <p><a href="/">Novo evento</a></p>
 </body>
 </html>
