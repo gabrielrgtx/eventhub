@@ -15,10 +15,16 @@ public class CreateEventServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String id = req.getParameter("id");
         String eventName = req.getParameter("event-name");
         Event evento = new Event();
         evento.setNome(eventName);
-        new EventDao().createEvent(evento);
+        if (id == null || id.isEmpty()) {
+            new EventDao().createEvent(evento);
+        } else {
+            evento.setId(Integer.parseInt(id));
+            new EventDao().updateEvent(evento);
+        }
         resp.sendRedirect("/listar-eventos");
     }
 }

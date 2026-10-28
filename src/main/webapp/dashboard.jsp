@@ -18,6 +18,7 @@
                 <td>${evento.id}</td>
                 <td>${evento.nome}</td>
                 <td>
+                    <a href="index.jsp?id=${evento.id}&name=${evento.nome}">Editar</a>
                     <form action="/delete-event" method="post">
                         <input type="hidden" id="id" name="id" value="${evento.id}">
                         <button type="submit">Delete</button>
