@@ -130,7 +130,7 @@ public class EventDao {
         }
     }
 
-        public void cancelEventById(int id) {
+    public void cancelEventById(int id) {
         String SQL = "UPDATE EVENTO SET CANCELADO = TRUE WHERE ID = ?";
         try {
             Connection connection = ConnectionFactory.getConnection();
@@ -163,6 +163,27 @@ public class EventDao {
         } catch (Exception e) {
             System.out.println("fail in database connection");
             return 0;
+        }
+    }
+
+    public List<Event> findByCriador(int userId) {
+        String SQL = "SELECT * FROM EVENTO WHERE CRIADOR_ID = ?";
+        List<Event> eventos = new ArrayList<>();
+        try {
+            Connection connection = ConnectionFactory.getConnection();
+            System.out.println("success in database connection");
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            preparedStatement.setInt(1, userId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                eventos.add(montarEvento(resultSet));
+            }
+            System.out.println("success in find events by criador");
+            connection.close();
+            return eventos;
+        } catch (Exception e) {
+            System.out.println("fail in database connection");
+            return Collections.emptyList();
         }
     }
 
