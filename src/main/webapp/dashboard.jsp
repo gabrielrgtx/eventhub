@@ -1,3 +1,4 @@
+<%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
 <html>
@@ -26,6 +27,16 @@
                     <form action="/delete-event" method="post">
                         <input type="hidden" id="id" name="id" value="${evento.id}">
                         <button type="submit">Delete</button>
+                    </form>
+                    <form action="/inscricao" method="post">
+                        <input type="hidden" name="acao" value="inscrever">
+                        <input type="hidden" name="eventoId" value="${evento.id}">
+                        <button type="submit">Inscrever-se</button>
+                    </form>
+                    <form action="/inscricao" method="post">
+                        <input type="hidden" name="acao" value="cancelar">
+                        <input type="hidden" name="eventoId" value="${evento.id}">
+                        <button type="submit">Cancelar inscrição</button>
                     </form>
                 </td>
             </tr>
