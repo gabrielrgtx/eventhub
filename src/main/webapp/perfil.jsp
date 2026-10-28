@@ -8,6 +8,8 @@
 <body>
     <h1>Meu perfil</h1>
 
+    <p>${param.erro == 'eventos' ? 'Você não pode excluir a conta enquanto tiver eventos publicados.' : ''}</p>
+
     <form action="/perfil" method="post">
         <label>Nome</label>
         <input type="text" name="nome" value="${usuarioLogado.nome}"><br>
@@ -22,6 +24,10 @@
         <input type="text" name="foto" value="${usuarioLogado.foto}"><br>
 
         <button type="submit">Salvar</button>
+    </form>
+
+    <form action="/excluir-conta" method="post" onsubmit="return confirm('Tem certeza que quer excluir sua conta?');">
+        <button type="submit">Excluir conta</button>
     </form>
 
     <p><a href="/logout">Sair</a></p>
