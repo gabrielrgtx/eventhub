@@ -48,4 +48,18 @@ public class EventDao {
             return Collections.emptyList();
         }
     }
+        public void deleteEventById(String eventId) {
+        String SQL = "DELETE FROM EVENTO WHERE ID = ?";
+        try {
+            Connection connection = ConnectionFactory.getConnection();
+            System.out.println("success in database connection");
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            preparedStatement.setString(1, eventId);
+            preparedStatement.execute();
+            System.out.println("success on delete event with id: " + eventId);
+            connection.close();
+        } catch (Exception e) {
+            System.out.println("fail in database connection");
+        }
+    }
 }
