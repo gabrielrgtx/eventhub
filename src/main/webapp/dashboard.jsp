@@ -32,5 +32,6 @@
         </c:forEach>
     </table>
     <p><a href="/">Novo evento</a></p>
+    <p><a href="/painel">Meu painel</a></p>
 </body>
 </html>
