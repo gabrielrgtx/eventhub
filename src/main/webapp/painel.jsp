@@ -14,6 +14,11 @@
         <div class="linhas"><span></span><span></span></div>
         <h1 class="titulo-pagina">Dashboard</h1>
 
+        <c:choose>
+            <c:when test="${param.retorno == 'presenca-confirmada'}"><p class="mensagem" role="status">Presença confirmada. A pessoa já pode avaliar o evento.</p></c:when>
+            <c:when test="${param.retorno == 'presenca-nao-confirmada'}"><p class="mensagem" role="alert">Não foi possível confirmar a presença. Confira se a pessoa está inscrita e se o evento já aconteceu.</p></c:when>
+        </c:choose>
+
         <div class="caixa painel-caixa">
             <h2>Próximos Eventos</h2>
             <div class="calendario-proximos"><div class="calendario"><header id="mes-atual"></header><div class="calendario-dias" id="calendario-dias"></div></div><div>
@@ -36,6 +41,32 @@
                     <%@ include file="cartao-linha.jsp" %>
                 </c:forEach>
             </div>
+
+            <c:forEach var="evento" items="${criados}">
+                <details class="participantes" id="participantes-${evento.id}">
+                    <summary>Inscritos em <c:out value="${evento.nome}"/></summary>
+                    <c:choose>
+                        <c:when test="${empty evento.inscritos}"><p class="vazio">Ainda não há inscritos neste evento.</p></c:when>
+                        <c:otherwise>
+                            <ul>
+                                <c:forEach var="inscricao" items="${evento.inscritos}">
+                                    <li><span><strong><c:out value="${inscricao.usuario.nome}"/></strong> @<c:out value="${inscricao.usuario.usuario}"/></span>
+                                        <c:choose>
+                                            <c:when test="${inscricao.presencaConfirmada}"><span class="status-presenca">Presença confirmada</span></c:when>
+                                            <c:when test="${evento.presencaLiberada}"><form action="/inscricao" method="post"><input type="hidden" name="acao" value="confirmar-presenca"><input type="hidden" name="eventoId" value="${evento.id}"><input type="hidden" name="usuarioId" value="${inscricao.usuario.id}"><button class="botao pequeno claro" type="submit">Confirmar presença</button></form></c:when>
+                                            <c:otherwise><span class="vazio">Aguardando o evento</span></c:otherwise>
+                                        </c:choose>
+                                    </li>
+                                </c:forEach>
+                            </ul>
+                        </c:otherwise>
+                    </c:choose>
+                </details>
+            </c:forEach>
+
+            <h2>Aguardando confirmação de presença</h2>
+            <c:if test="${empty aguardandoPresenca}"><p class="vazio">Nenhuma presença pendente.</p></c:if>
+            <div class="lista-horizontal"><c:forEach var="evento" items="${aguardandoPresenca}"><%@ include file="cartao-linha.jsp" %></c:forEach></div>
 
             <h2>Eventos Que Fui</h2>
             <c:if test="${empty fui}">

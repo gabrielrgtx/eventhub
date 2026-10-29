@@ -9,7 +9,13 @@ import java.sql.SQLException;
 
 public class UserDao {
 
-    public void insert(User usuario) {
+    private boolean erroLogin;
+
+    public boolean isErroLogin() {
+        return erroLogin;
+    }
+
+    public int insert(User usuario) {
         String SQL = "INSERT INTO USUARIO (NOME, USUARIO, EMAIL, SENHA, FOTO) VALUES (?, ?, ?, ?, ?)";
         try {
             Connection connection = ConnectionFactory.getConnection();
@@ -23,8 +29,13 @@ public class UserDao {
             preparedStatement.execute();
             System.out.println("success in insert user");
             connection.close();
+            return 1;
+        } catch (SQLException e) {
+            System.out.println("fail in database connection");
+            return "23505".equals(e.getSQLState()) ? 2 : 0;
         } catch (Exception e) {
             System.out.println("fail in database connection");
+            return 0;
         }
     }
 
@@ -50,6 +61,7 @@ public class UserDao {
     }
 
     public User findByLogin(String identificador, String senha) {
+        erroLogin = false;
         String SQL = "SELECT * FROM USUARIO WHERE (USUARIO = ? OR EMAIL = ?) AND SENHA = ?";
         try {
             Connection connection = ConnectionFactory.getConnection();
@@ -68,11 +80,12 @@ public class UserDao {
             return usuario;
         } catch (Exception e) {
             System.out.println("fail in database connection");
+            erroLogin = true;
             return null;
         }
     }
 
-    public void update(User usuario) {
+    public int update(User usuario) {
         String SQL = "UPDATE USUARIO SET NOME = ?, USUARIO = ?, EMAIL = ?, FOTO = ? WHERE ID = ?";
         try {
             Connection connection = ConnectionFactory.getConnection();
@@ -83,11 +96,16 @@ public class UserDao {
             preparedStatement.setString(3, usuario.getEmail());
             preparedStatement.setString(4, usuario.getFoto());
             preparedStatement.setInt(5, usuario.getId());
-            preparedStatement.execute();
+            int alterados = preparedStatement.executeUpdate();
             System.out.println("success in update user");
             connection.close();
+            return alterados == 1 ? 1 : 0;
+        } catch (SQLException e) {
+            System.out.println("fail in database connection");
+            return "23505".equals(e.getSQLState()) ? 2 : 0;
         } catch (Exception e) {
             System.out.println("fail in database connection");
+            return 0;
         }
     }
 

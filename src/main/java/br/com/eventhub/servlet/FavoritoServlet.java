@@ -38,6 +38,11 @@ public class FavoritoServlet extends HttpServlet {
         } else if ("desfavoritar".equals(acao)) {
             favoritoDao.deleteFavorito(usuario.getId(), eventoId);
         }
+        String voltar = req.getParameter("voltar");
+        if (voltar != null && voltar.matches("/(listar-eventos|perfil)(\\?[A-Za-z0-9=&%+._-]*)?")) {
+            resp.sendRedirect(req.getContextPath() + voltar + "#evento-" + eventoId);
+            return;
+        }
         resp.sendRedirect(req.getContextPath() + "/evento?id=" + eventoId);
     }
 }

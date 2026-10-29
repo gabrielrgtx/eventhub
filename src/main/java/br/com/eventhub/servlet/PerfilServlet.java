@@ -4,14 +4,17 @@ import br.com.eventhub.dao.UserDao;
 import br.com.eventhub.model.User;
 
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
 import java.io.IOException;
 
-@WebServlet("/perfil")
+@WebServlet("/editar-perfil")
+@MultipartConfig(fileSizeThreshold = 1024 * 1024, maxFileSize = 5 * 1024 * 1024, maxRequestSize = 6 * 1024 * 1024)
 public class PerfilServlet extends HttpServlet {
 
     @Override
@@ -34,25 +37,55 @@ public class PerfilServlet extends HttpServlet {
             return;
         }
 
-        String nome = req.getParameter("nome");
-        String login = req.getParameter("usuario");
-        String email = req.getParameter("email");
-        String foto = req.getParameter("foto");
-
-        if (nome == null || nome.isEmpty() || login == null || login.isEmpty() || email == null || email.isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/perfil");
+        Part arquivo;
+        try {
+            arquivo = req.getPart("foto-arquivo");
+        } catch (IllegalStateException e) {
+            resp.sendRedirect(req.getContextPath() + "/perfil?erro=foto");
             return;
         }
 
-        usuario.setNome(nome);
-        usuario.setUsuario(login);
-        usuario.setEmail(email);
-        if (foto != null && !foto.isEmpty()) {
-            usuario.setFoto(foto);
+        boolean somenteFoto = "foto".equals(req.getParameter("acao"));
+        User atualizado = new User();
+        atualizado.setId(usuario.getId());
+        atualizado.setFoto(usuario.getFoto());
+
+        if (somenteFoto) {
+            atualizado.setNome(usuario.getNome());
+            atualizado.setUsuario(usuario.getUsuario());
+            atualizado.setEmail(usuario.getEmail());
+        } else {
+            String nome = req.getParameter("nome");
+            String login = req.getParameter("usuario");
+            String email = req.getParameter("email");
+            if (nome == null || nome.isEmpty() || login == null || login.isEmpty() || email == null || email.isEmpty()) {
+                resp.sendRedirect(req.getContextPath() + "/editar-perfil");
+                return;
+            }
+            atualizado.setNome(nome);
+            atualizado.setUsuario(login);
+            atualizado.setEmail(email);
+            if (req.getParameter("remover-foto") != null) {
+                atualizado.setFoto(null);
+            }
         }
 
-        new UserDao().update(usuario);
-        session.setAttribute("usuarioLogado", usuario);
-        resp.sendRedirect(req.getContextPath() + "/perfil");
+        if (arquivo != null && arquivo.getSize() > 0) {
+            String caminho = UploadServlet.salvar(arquivo);
+            if (caminho == null) {
+                resp.sendRedirect(req.getContextPath() + (somenteFoto ? "/perfil?erro=foto" : "/editar-perfil?erro=foto"));
+                return;
+            }
+            atualizado.setFoto(caminho);
+        }
+
+        int resultado = new UserDao().update(atualizado);
+        if (resultado != 1) {
+            resp.sendRedirect(req.getContextPath() + "/editar-perfil?erro=" + (resultado == 2 ? "duplicado" : "salvar"));
+            return;
+        }
+        atualizado.setSenha(usuario.getSenha());
+        session.setAttribute("usuarioLogado", atualizado);
+        resp.sendRedirect(req.getContextPath() + (somenteFoto ? "/perfil?retorno=foto" : "/editar-perfil?retorno=salvo"));
     }
 }

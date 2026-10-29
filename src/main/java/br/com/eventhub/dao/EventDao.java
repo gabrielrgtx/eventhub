@@ -17,6 +17,12 @@ import java.util.List;
 
 public class EventDao {
 
+    private boolean erroBusca;
+
+    public boolean isErroBusca() {
+        return erroBusca;
+    }
+
     public int createEvent(Event evento) {
         String SQL = "INSERT INTO EVENTO (NOME, SOBRE, DATA_EVENTO, INICIO, FIM, VAGAS, PUBLICO, CANCELADO, CRIADOR_ID, RUA, NUMERO, BAIRRO, CIDADE, ESTADO, CEP) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
@@ -94,11 +100,30 @@ public class EventDao {
         }
     }
 
-    public void updateEvent(Event evento) {
+    public boolean updateEvent(Event evento) {
         String SQL = "UPDATE EVENTO SET NOME = ?, SOBRE = ?, DATA_EVENTO = ?, INICIO = ?, FIM = ?, VAGAS = ?, PUBLICO = ?, CANCELADO = ?, RUA = ?, NUMERO = ?, BAIRRO = ?, CIDADE = ?, ESTADO = ?, CEP = ? WHERE ID = ?";
+        String SQL_BLOQUEAR = "SELECT ID FROM EVENTO WHERE ID = ? FOR UPDATE";
+        String SQL_INSCRITOS = "SELECT COUNT(*) FROM INSCRICAO WHERE EVENTO_ID = ?";
+        Connection connection = null;
         try {
-            Connection connection = ConnectionFactory.getConnection();
+            connection = ConnectionFactory.getConnection();
             System.out.println("success in database connection");
+            connection.setAutoCommit(false);
+            PreparedStatement bloquearStatement = connection.prepareStatement(SQL_BLOQUEAR);
+            bloquearStatement.setInt(1, evento.getId());
+            ResultSet bloqueado = bloquearStatement.executeQuery();
+            if (!bloqueado.next()) {
+                connection.rollback();
+                return false;
+            }
+            PreparedStatement inscritosStatement = connection.prepareStatement(SQL_INSCRITOS);
+            inscritosStatement.setInt(1, evento.getId());
+            ResultSet inscritos = inscritosStatement.executeQuery();
+            inscritos.next();
+            if (evento.getVagas() < inscritos.getInt(1)) {
+                connection.rollback();
+                return false;
+            }
             PreparedStatement preparedStatement = connection.prepareStatement(SQL);
             preparedStatement.setString(1, evento.getNome());
             preparedStatement.setString(2, evento.getSobre());
@@ -115,11 +140,28 @@ public class EventDao {
             preparedStatement.setString(13, evento.getEndereco().getEstado());
             preparedStatement.setString(14, evento.getEndereco().getCep());
             preparedStatement.setInt(15, evento.getId());
-            preparedStatement.execute();
+            int alterados = preparedStatement.executeUpdate();
+            connection.commit();
             System.out.println("success in update event");
-            connection.close();
+            return alterados == 1;
         } catch (Exception e) {
             System.out.println("fail in database connection");
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (Exception ignored) {
+                    System.out.println("fail in database connection");
+                }
+            }
+            return false;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (Exception ignored) {
+                    System.out.println("fail in database connection");
+                }
+            }
         }
     }
 
@@ -217,6 +259,7 @@ public class EventDao {
     }
 
     public List<Event> search(String nome, int categoriaId, String cidade, String data, int usuarioId) {
+        erroBusca = false;
         String SQL = "SELECT * FROM EVENTO WHERE (PUBLICO = TRUE OR CRIADOR_ID = ?)"
                 + " AND (? = '' OR UPPER(NOME) LIKE UPPER(?))"
                 + " AND (? = '' OR UPPER(CIDADE) LIKE UPPER(?))"
@@ -246,6 +289,7 @@ public class EventDao {
             return eventos;
         } catch (Exception e) {
             System.out.println("fail in database connection");
+            erroBusca = true;
             return Collections.emptyList();
         }
     }

@@ -11,6 +11,19 @@
 <body>
     <%@ include file="cabecalho.jsp" %>
     <main class="container">
+        <c:choose>
+            <c:when test="${param.retorno == 'evento-publicado'}"><p class="mensagem" role="status">Evento publicado com sucesso.</p></c:when>
+            <c:when test="${param.retorno == 'evento-atualizado'}"><p class="mensagem" role="status">Evento atualizado com sucesso.</p></c:when>
+            <c:when test="${param.retorno == 'inscricao-confirmada'}"><p class="mensagem" role="status">Inscrição confirmada! Você encontra este evento no seu painel.</p></c:when>
+            <c:when test="${param.retorno == 'inscricao-cancelada'}"><p class="mensagem" role="status">Sua inscrição foi cancelada.</p></c:when>
+            <c:when test="${param.retorno == 'ja-inscrito'}"><p class="mensagem" role="status">Você já está inscrito neste evento.</p></c:when>
+            <c:when test="${param.retorno == 'nao-inscrito'}"><p class="mensagem" role="alert">Não encontramos uma inscrição sua para cancelar.</p></c:when>
+            <c:when test="${param.retorno == 'vagas-esgotadas'}"><p class="mensagem" role="alert">As vagas acabaram antes da sua inscrição.</p></c:when>
+            <c:when test="${param.retorno == 'inscricoes-encerradas'}"><p class="mensagem" role="alert">As inscrições e cancelamentos foram encerrados porque o evento começou.</p></c:when>
+            <c:when test="${param.retorno == 'evento-proprio'}"><p class="mensagem" role="alert">Você não pode se inscrever no evento que criou.</p></c:when>
+            <c:when test="${param.retorno == 'evento-indisponivel'}"><p class="mensagem" role="alert">Este evento não está disponível para inscrição.</p></c:when>
+            <c:when test="${param.retorno == 'falha-inscricao'}"><p class="mensagem" role="alert">Não foi possível concluir a ação. Tente novamente.</p></c:when>
+        </c:choose>
         <section class="detalhe">
             <div class="galeria">
                 <c:choose>
@@ -30,7 +43,7 @@
                 <c:if test="${evento.cancelado}">
                     <p class="status">Evento cancelado</p>
                 </c:if>
-                <p>Criado por <a href="/usuario?id=${evento.criador.id}"><c:out value="${evento.criador.nome}"/></a></p>
+                <p>Criado por <a href="/perfil?id=${evento.criador.id}"><c:out value="${evento.criador.nome}"/></a></p>
                 <c:if test="${not empty evento.categorias}">
                     <div class="pilulas">
                         <c:forEach var="categoria" items="${evento.categorias}">
@@ -41,6 +54,9 @@
 
                 <div class="acoes">
                     <c:choose>
+                        <c:when test="${evento.cancelado}"><span class="status">Evento cancelado</span></c:when>
+                        <c:when test="${evento.inscricoesEncerradas}"><span class="status">Inscrições encerradas</span></c:when>
+                        <c:when test="${not empty usuarioLogado and usuarioLogado.id == evento.criador.id}"><span class="status">Você criou este evento</span></c:when>
                         <c:when test="${empty usuarioLogado}">
                             <a class="botao" href="/login">Entre para se inscrever</a>
                         </c:when>
@@ -79,14 +95,24 @@
                         </c:choose>
                     </c:if>
                 </div>
-                <c:choose>
-                    <c:when test="${vagasRestantes <= 0}">
-                        <p class="status">Esgotado</p>
-                    </c:when>
-                    <c:otherwise>
-                        <p>${vagasRestantes} vagas restantes</p>
-                    </c:otherwise>
-                </c:choose>
+                <c:if test="${not empty usuarioLogado and usuarioLogado.id == evento.criador.id}">
+                    <div class="acoes acoes-dono">
+                        <a class="botao claro" href="/editar-evento?id=${evento.id}">Editar evento</a>
+                        <c:if test="${not evento.cancelado}">
+                            <form action="/cancelar-evento" method="post" onsubmit="return confirm('Cancelar este evento? As pessoas inscritas vão ver o evento como cancelado.');">
+                                <input type="hidden" name="id" value="${evento.id}">
+                                <button class="botao claro" type="submit">Cancelar evento</button>
+                            </form>
+                        </c:if>
+                        <form action="/delete-event" method="post" onsubmit="return confirm('Excluir este evento? Essa ação não pode ser desfeita.');">
+                            <input type="hidden" name="id" value="${evento.id}">
+                            <button class="botao perigo" type="submit">Excluir evento</button>
+                        </form>
+                    </div>
+                </c:if>
+                <c:if test="${not evento.inscricoesEncerradas and not evento.cancelado}">
+                    <c:choose><c:when test="${vagasRestantes <= 0}"><p class="status">Esgotado</p></c:when><c:otherwise><p>${vagasRestantes} vagas restantes</p></c:otherwise></c:choose>
+                </c:if>
             </div>
         </section>
 
@@ -116,6 +142,7 @@
         <div class="comentarios-lista">
         <h2 class="subtitulo">Comentários</h2>
         <p class="vazio">Um pouco do que andam falando por aí</p>
+        <c:if test="${inscrito and evento.presencaLiberada and not presencaConfirmada}"><p class="vazio">Sua avaliação fica disponível após o organizador confirmar sua presença.</p></c:if>
         <c:if test="${not empty param.erro}">
             <p class="mensagem">Não foi possível avaliar: <c:out value="${param.erro}"/></p>
         </c:if>
@@ -147,7 +174,13 @@
         <c:forEach var="avaliacao" items="${avaliacoes}">
             <div class="comentario">
                 <div class="comentario-topo">
-                    <div class="comentario-autor"><span class="comentario-avatar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14c2 3 6 3 8 0M9 9h.01M15 9h.01"/></svg></span><a href="/usuario?id=${avaliacao.usuario.id}"><c:out value="${avaliacao.usuario.nome}"/></a></div>
+                    <div class="comentario-autor">
+                        <c:choose>
+                            <c:when test="${not empty avaliacao.usuario.foto}"><img class="comentario-avatar" src="<c:out value="${avaliacao.usuario.foto}"/>" alt=""></c:when>
+                            <c:otherwise><span class="comentario-avatar"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 14c2 3 6 3 8 0M9 9h.01M15 9h.01"/></svg></span></c:otherwise>
+                        </c:choose>
+                        <div><a href="/perfil?id=${avaliacao.usuario.id}"><c:out value="${avaliacao.usuario.nome}"/></a><small>@<c:out value="${avaliacao.usuario.usuario}"/></small></div>
+                    </div>
                     <span class="estrelas">
                         <c:forEach var="i" items="1,2,3,4,5">
                             <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="${i <= avaliacao.nota ? 'currentColor' : 'none'}" aria-hidden="true"><path d="m12 2 3.1 6.3 7 1-5.1 5 .9 7-5.9-3.3-5.9 3.3.9-7-5.1-5 7-1Z"/></svg>

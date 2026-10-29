@@ -2,6 +2,7 @@ package br.com.eventhub.model;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,9 +22,35 @@ public class Event {
     private Endereco endereco;
     private List<Categoria> categorias = new ArrayList<>();
     private List<ImagemEvento> imagens = new ArrayList<>();
+    private List<Inscricao> inscritos = new ArrayList<>();
     private int vagasRestantes;
     private boolean inscrito;
     private boolean favoritado;
+    private boolean inscricoesEncerradas;
+    private boolean presencaLiberada;
+
+    public String getDataFormatada() {
+        if (data == null) {
+            return "";
+        }
+        return data.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+    }
+
+    public boolean isInscricoesEncerradas() {
+        return inscricoesEncerradas;
+    }
+
+    public void setInscricoesEncerradas(boolean inscricoesEncerradas) {
+        this.inscricoesEncerradas = inscricoesEncerradas;
+    }
+
+    public boolean isPresencaLiberada() {
+        return presencaLiberada;
+    }
+
+    public void setPresencaLiberada(boolean presencaLiberada) {
+        this.presencaLiberada = presencaLiberada;
+    }
 
     public boolean isFavoritado() {
         return favoritado;
@@ -151,6 +178,14 @@ public class Event {
 
     public void setImagens(List<ImagemEvento> imagens) {
         this.imagens = imagens;
+    }
+
+    public List<Inscricao> getInscritos() {
+        return inscritos;
+    }
+
+    public void setInscritos(List<Inscricao> inscritos) {
+        this.inscritos = inscritos;
     }
 }
 

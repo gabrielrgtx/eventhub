@@ -55,8 +55,8 @@ public class AvaliacaoServlet extends HttpServlet {
                 return;
             }
 
-            if (!new InscricaoDao().existsInscricao(usuario.getId(), eventoId)) {
-                resp.sendRedirect(destino + "&erro=sem-inscricao");
+            if (!new InscricaoDao().existsPresenca(usuario.getId(), eventoId)) {
+                resp.sendRedirect(destino + "&erro=presenca-nao-confirmada");
                 return;
             }
 

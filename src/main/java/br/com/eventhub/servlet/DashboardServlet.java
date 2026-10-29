@@ -2,6 +2,7 @@ package br.com.eventhub.servlet;
 
 import br.com.eventhub.dao.EventDao;
 import br.com.eventhub.dao.ImagemEventoDao;
+import br.com.eventhub.dao.InscricaoDao;
 import br.com.eventhub.model.Event;
 import br.com.eventhub.model.User;
 
@@ -29,16 +30,24 @@ public class DashboardServlet extends HttpServlet {
         }
         int usuarioId = usuario.getId();
         ImagemEventoDao imagemEventoDao = new ImagemEventoDao();
+        InscricaoDao inscricaoDao = new InscricaoDao();
         List<Event> criados = new EventDao().findByCriador(usuarioId);
         for (Event evento : criados) {
             evento.setImagens(imagemEventoDao.findByEvento(evento.getId()));
+            evento.setInscritos(inscricaoDao.findByEvento(evento.getId()));
+            evento.setPresencaLiberada(evento.getData().isBefore(LocalDate.now()) && !evento.isCancelado());
         }
         List<Event> vou = new ArrayList<>();
         List<Event> fui = new ArrayList<>();
+        List<Event> aguardandoPresenca = new ArrayList<>();
         for (Event evento : new EventDao().findByInscrito(usuarioId)) {
             evento.setImagens(imagemEventoDao.findByEvento(evento.getId()));
             if (evento.getData().isBefore(LocalDate.now())) {
-                fui.add(evento);
+                if (inscricaoDao.existsPresenca(usuarioId, evento.getId())) {
+                    fui.add(evento);
+                } else {
+                    aguardandoPresenca.add(evento);
+                }
             } else {
                 vou.add(evento);
             }
@@ -50,6 +59,7 @@ public class DashboardServlet extends HttpServlet {
         req.setAttribute("criados", criados);
         req.setAttribute("vou", vou);
         req.setAttribute("fui", fui);
+        req.setAttribute("aguardandoPresenca", aguardandoPresenca);
         req.setAttribute("favoritos", favoritos);
         req.getRequestDispatcher("/painel.jsp").forward(req, resp);
     }
