@@ -26,7 +26,7 @@ public class ExcluirContaServlet extends HttpServlet {
 
         int eventos = new EventDao().countByCriador(usuario.getId());
         if (eventos > 0) {
-            resp.sendRedirect(req.getContextPath() + "/perfil?erro=eventos");
+            resp.sendRedirect(req.getContextPath() + "/editar-perfil?erro=eventos");
             return;
         }
 

@@ -1,6 +1,7 @@
 package br.com.eventhub.dao;
 
 import br.com.eventhub.model.Avaliacao;
+import br.com.eventhub.model.Endereco;
 import br.com.eventhub.model.Event;
 import br.com.eventhub.model.User;
 
@@ -32,7 +33,7 @@ public class AvaliacaoDao {
     }
 
     public List<Avaliacao> findByEvento(int eventoId) {
-        String SQL = "SELECT A.ID, A.NOTA, A.COMENTARIO, A.DATA_AVALIACAO, U.ID AS USUARIO_ID, U.NOME "
+        String SQL = "SELECT A.ID, A.NOTA, A.COMENTARIO, A.DATA_AVALIACAO, U.ID AS USUARIO_ID, U.NOME, U.USUARIO, U.FOTO "
                 + "FROM AVALIACAO A JOIN USUARIO U ON U.ID = A.USUARIO_ID WHERE A.EVENTO_ID = ?";
         List<Avaliacao> avaliacoes = new ArrayList<>();
         try {
@@ -50,6 +51,8 @@ public class AvaliacaoDao {
                 User usuario = new User();
                 usuario.setId(resultSet.getInt("USUARIO_ID"));
                 usuario.setNome(resultSet.getString("NOME"));
+                usuario.setUsuario(resultSet.getString("USUARIO"));
+                usuario.setFoto(resultSet.getString("FOTO"));
                 avaliacao.setUsuario(usuario);
                 avaliacoes.add(avaliacao);
             }
@@ -63,8 +66,8 @@ public class AvaliacaoDao {
     }
 
     public List<Avaliacao> findByUsuario(int usuarioId) {
-        String SQL = "SELECT A.ID, A.NOTA, A.COMENTARIO, A.DATA_AVALIACAO, E.ID AS EVENTO_ID, E.NOME "
-                + "FROM AVALIACAO A JOIN EVENTO E ON E.ID = A.EVENTO_ID WHERE A.USUARIO_ID = ?";
+        String SQL = "SELECT A.ID, A.NOTA, A.COMENTARIO, A.DATA_AVALIACAO, E.ID AS EVENTO_ID, E.NOME, E.DATA_EVENTO, E.CIDADE "
+                + "FROM AVALIACAO A JOIN EVENTO E ON E.ID = A.EVENTO_ID WHERE A.USUARIO_ID = ? ORDER BY A.DATA_AVALIACAO DESC";
         List<Avaliacao> avaliacoes = new ArrayList<>();
         try {
             Connection connection = ConnectionFactory.getConnection();
@@ -81,6 +84,10 @@ public class AvaliacaoDao {
                 Event evento = new Event();
                 evento.setId(resultSet.getInt("EVENTO_ID"));
                 evento.setNome(resultSet.getString("NOME"));
+                evento.setData(resultSet.getDate("DATA_EVENTO").toLocalDate());
+                Endereco endereco = new Endereco();
+                endereco.setCidade(resultSet.getString("CIDADE"));
+                evento.setEndereco(endereco);
                 avaliacao.setEvento(evento);
                 avaliacoes.add(avaliacao);
             }

@@ -25,6 +25,6 @@ public class NovoEventoServlet extends HttpServlet {
         }
         req.setAttribute("categorias", new CategoriaDao().findAll());
         req.setAttribute("categoriasEvento", new ArrayList<Integer>());
-        req.getRequestDispatcher("/index.jsp").forward(req, resp);
+        req.getRequestDispatcher("/formulario-evento.jsp").forward(req, resp);
     }
 }

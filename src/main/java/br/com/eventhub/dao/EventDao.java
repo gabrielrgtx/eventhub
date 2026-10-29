@@ -11,12 +11,17 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class EventDao {
+
+    private boolean erroBusca;
+
+    public boolean isErroBusca() {
+        return erroBusca;
+    }
 
     public int createEvent(Event evento) {
         String SQL = "INSERT INTO EVENTO (NOME, SOBRE, DATA_EVENTO, INICIO, FIM, VAGAS, PUBLICO, CANCELADO, CRIADOR_ID, RUA, NUMERO, BAIRRO, CIDADE, ESTADO, CEP) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -95,11 +100,30 @@ public class EventDao {
         }
     }
 
-    public void updateEvent(Event evento) {
+    public boolean updateEvent(Event evento) {
         String SQL = "UPDATE EVENTO SET NOME = ?, SOBRE = ?, DATA_EVENTO = ?, INICIO = ?, FIM = ?, VAGAS = ?, PUBLICO = ?, CANCELADO = ?, RUA = ?, NUMERO = ?, BAIRRO = ?, CIDADE = ?, ESTADO = ?, CEP = ? WHERE ID = ?";
+        String SQL_BLOQUEAR = "SELECT ID FROM EVENTO WHERE ID = ? FOR UPDATE";
+        String SQL_INSCRITOS = "SELECT COUNT(*) FROM INSCRICAO WHERE EVENTO_ID = ?";
+        Connection connection = null;
         try {
-            Connection connection = ConnectionFactory.getConnection();
+            connection = ConnectionFactory.getConnection();
             System.out.println("success in database connection");
+            connection.setAutoCommit(false);
+            PreparedStatement bloquearStatement = connection.prepareStatement(SQL_BLOQUEAR);
+            bloquearStatement.setInt(1, evento.getId());
+            ResultSet bloqueado = bloquearStatement.executeQuery();
+            if (!bloqueado.next()) {
+                connection.rollback();
+                return false;
+            }
+            PreparedStatement inscritosStatement = connection.prepareStatement(SQL_INSCRITOS);
+            inscritosStatement.setInt(1, evento.getId());
+            ResultSet inscritos = inscritosStatement.executeQuery();
+            inscritos.next();
+            if (evento.getVagas() < inscritos.getInt(1)) {
+                connection.rollback();
+                return false;
+            }
             PreparedStatement preparedStatement = connection.prepareStatement(SQL);
             preparedStatement.setString(1, evento.getNome());
             preparedStatement.setString(2, evento.getSobre());
@@ -116,11 +140,28 @@ public class EventDao {
             preparedStatement.setString(13, evento.getEndereco().getEstado());
             preparedStatement.setString(14, evento.getEndereco().getCep());
             preparedStatement.setInt(15, evento.getId());
-            preparedStatement.execute();
+            int alterados = preparedStatement.executeUpdate();
+            connection.commit();
             System.out.println("success in update event");
-            connection.close();
+            return alterados == 1;
         } catch (Exception e) {
             System.out.println("fail in database connection");
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (Exception ignored) {
+                    System.out.println("fail in database connection");
+                }
+            }
+            return false;
+        } finally {
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (Exception ignored) {
+                    System.out.println("fail in database connection");
+                }
+            }
         }
     }
 
@@ -217,40 +258,28 @@ public class EventDao {
         }
     }
 
-    public List<Event> search(String nome, Integer categoriaId, String cidade, LocalDate data, int usuarioId) {
-        String SQL = "SELECT DISTINCT E.* FROM EVENTO E LEFT JOIN EVENTO_CATEGORIA EC ON E.ID = EC.EVENTO_ID WHERE (E.PUBLICO = TRUE OR E.CRIADOR_ID = ?)";
-        if (nome != null) {
-            SQL += " AND UPPER(E.NOME) LIKE UPPER(?)";
-        }
-        if (categoriaId != null) {
-            SQL += " AND EC.CATEGORIA_ID = ?";
-        }
-        if (cidade != null) {
-            SQL += " AND UPPER(E.CIDADE) LIKE UPPER(?)";
-        }
-        if (data != null) {
-            SQL += " AND E.DATA_EVENTO = ?";
-        }
-        SQL += " ORDER BY E.DATA_EVENTO";
+    public List<Event> search(String nome, int categoriaId, String cidade, String data, int usuarioId) {
+        erroBusca = false;
+        String SQL = "SELECT * FROM EVENTO WHERE (PUBLICO = TRUE OR CRIADOR_ID = ?)"
+                + " AND (? = '' OR UPPER(NOME) LIKE UPPER(?))"
+                + " AND (? = '' OR UPPER(CIDADE) LIKE UPPER(?))"
+                + " AND (? = '' OR CAST(DATA_EVENTO AS VARCHAR) = ?)"
+                + " AND (? = 0 OR ID IN (SELECT EVENTO_ID FROM EVENTO_CATEGORIA WHERE CATEGORIA_ID = ?))"
+                + " ORDER BY DATA_EVENTO";
         List<Event> eventos = new ArrayList<>();
         try {
             Connection connection = ConnectionFactory.getConnection();
             System.out.println("success in database connection");
             PreparedStatement preparedStatement = connection.prepareStatement(SQL);
-            int indice = 1;
-            preparedStatement.setInt(indice++, usuarioId);
-            if (nome != null) {
-                preparedStatement.setString(indice++, "%" + nome + "%");
-            }
-            if (categoriaId != null) {
-                preparedStatement.setInt(indice++, categoriaId);
-            }
-            if (cidade != null) {
-                preparedStatement.setString(indice++, "%" + cidade + "%");
-            }
-            if (data != null) {
-                preparedStatement.setDate(indice, Date.valueOf(data));
-            }
+            preparedStatement.setInt(1, usuarioId);
+            preparedStatement.setString(2, nome);
+            preparedStatement.setString(3, "%" + nome + "%");
+            preparedStatement.setString(4, cidade);
+            preparedStatement.setString(5, "%" + cidade + "%");
+            preparedStatement.setString(6, data);
+            preparedStatement.setString(7, data);
+            preparedStatement.setInt(8, categoriaId);
+            preparedStatement.setInt(9, categoriaId);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 eventos.add(montarEvento(resultSet));
@@ -260,6 +289,7 @@ public class EventDao {
             return eventos;
         } catch (Exception e) {
             System.out.println("fail in database connection");
+            erroBusca = true;
             return Collections.emptyList();
         }
     }

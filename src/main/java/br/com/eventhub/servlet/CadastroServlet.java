@@ -8,6 +8,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @WebServlet("/cadastro")
@@ -15,6 +16,11 @@ public class CadastroServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+        if (session != null && session.getAttribute("usuarioLogado") != null) {
+            resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+            return;
+        }
         req.getRequestDispatcher("cadastro.jsp").forward(req, resp);
     }
 
@@ -40,7 +46,12 @@ public class CadastroServlet extends HttpServlet {
         usuario.setEmail(email);
         usuario.setSenha(senha);
 
-        new UserDao().insert(usuario);
-        resp.sendRedirect(req.getContextPath() + "/login");
+        int resultado = new UserDao().insert(usuario);
+        if (resultado == 1) {
+            resp.sendRedirect(req.getContextPath() + "/login?cadastro=sucesso");
+            return;
+        }
+        req.setAttribute("erro", resultado == 2 ? "Usuário ou e-mail já cadastrado." : "Não foi possível criar a conta. Tente novamente.");
+        req.getRequestDispatcher("cadastro.jsp").forward(req, resp);
     }
 }

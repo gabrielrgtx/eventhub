@@ -1,8 +1,6 @@
 package br.com.eventhub.servlet;
 
-import br.com.eventhub.dao.EventDao;
 import br.com.eventhub.dao.InscricaoDao;
-import br.com.eventhub.model.Event;
 import br.com.eventhub.model.User;
 
 import javax.servlet.ServletException;
@@ -34,18 +32,41 @@ public class InscricaoServlet extends HttpServlet {
         }
         String acao = req.getParameter("acao");
         InscricaoDao inscricaoDao = new InscricaoDao();
-        if ("inscrever".equals(acao)) {
-            Event evento = new EventDao().findEventById(eventoId);
-            boolean podeInscrever = evento != null
-                    && !evento.isCancelado()
-                    && !inscricaoDao.existsInscricao(usuarioId, eventoId)
-                    && inscricaoDao.countByEvento(eventoId) < evento.getVagas();
-            if (podeInscrever) {
-                inscricaoDao.insertInscricao(usuarioId, eventoId);
+        if ("confirmar-presenca".equals(acao)) {
+            int participanteId;
+            try {
+                participanteId = Integer.parseInt(req.getParameter("usuarioId"));
+            } catch (NumberFormatException e) {
+                resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+                return;
             }
-        } else if ("cancelar".equals(acao)) {
-            inscricaoDao.deleteInscricao(usuarioId, eventoId);
+            boolean confirmada = inscricaoDao.confirmarPresenca(usuarioId, participanteId, eventoId);
+            resp.sendRedirect(req.getContextPath() + "/painel?retorno=" + (confirmada ? "presenca-confirmada" : "presenca-nao-confirmada") + "#participantes-" + eventoId);
+            return;
         }
-        resp.sendRedirect(req.getContextPath() + "/evento?id=" + eventoId);
+        int resultado;
+        if ("inscrever".equals(acao)) {
+            resultado = inscricaoDao.inscrever(usuarioId, eventoId);
+        } else if ("cancelar".equals(acao)) {
+            resultado = inscricaoDao.cancelar(usuarioId, eventoId);
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+            return;
+        }
+        String retorno = "falha-inscricao";
+        if (resultado == InscricaoDao.SUCESSO) {
+            retorno = "inscrever".equals(acao) ? "inscricao-confirmada" : "inscricao-cancelada";
+        } else if (resultado == InscricaoDao.INDISPONIVEL) {
+            retorno = "evento-indisponivel";
+        } else if (resultado == InscricaoDao.JA_INSCRITO) {
+            retorno = "inscrever".equals(acao) ? "ja-inscrito" : "nao-inscrito";
+        } else if (resultado == InscricaoDao.ESGOTADO) {
+            retorno = "vagas-esgotadas";
+        } else if (resultado == InscricaoDao.ENCERRADO) {
+            retorno = "inscricoes-encerradas";
+        } else if (resultado == InscricaoDao.PROPRIO_EVENTO) {
+            retorno = "evento-proprio";
+        }
+        resp.sendRedirect(req.getContextPath() + "/evento?id=" + eventoId + "&retorno=" + retorno);
     }
 }

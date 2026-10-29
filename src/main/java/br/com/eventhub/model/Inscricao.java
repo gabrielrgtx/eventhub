@@ -8,6 +8,15 @@ public class Inscricao {
     private User usuario;
     private Event evento;
     private LocalDateTime dataInscricao;
+    private boolean presencaConfirmada;
+
+    public boolean isPresencaConfirmada() {
+        return presencaConfirmada;
+    }
+
+    public void setPresencaConfirmada(boolean presencaConfirmada) {
+        this.presencaConfirmada = presencaConfirmada;
+    }
 
 
     public int getId() {

@@ -42,6 +42,6 @@ public class EditEventServlet extends HttpServlet {
         req.setAttribute("categorias", new CategoriaDao().findAll());
         req.setAttribute("categoriasEvento", new EventoCategoriaDao().findCategoriaIdsByEvento(id));
         req.setAttribute("imagensEvento", new ImagemEventoDao().findByEvento(id));
-        req.getRequestDispatcher("/index.jsp").forward(req, resp);
+        req.getRequestDispatcher("/formulario-evento.jsp").forward(req, resp);
     }
 }

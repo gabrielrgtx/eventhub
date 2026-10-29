@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @WebServlet("/evento")
@@ -39,6 +40,8 @@ public class EventoDetalheServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/listar-eventos");
             return;
         }
+        evento.setInscricoesEncerradas(!LocalDateTime.of(evento.getData(), evento.getInicio()).isAfter(LocalDateTime.now()));
+        evento.setPresencaLiberada(evento.getData().isBefore(LocalDate.now()));
         List<Integer> categoriaIds = new EventoCategoriaDao().findCategoriaIdsByEvento(id);
         for (Categoria categoria : new CategoriaDao().findAll()) {
             if (categoriaIds.contains(categoria.getId())) {
@@ -55,12 +58,14 @@ public class EventoDetalheServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
         boolean inscrito = false;
+        boolean presencaConfirmada = false;
         boolean podeAvaliar = false;
         AvaliacaoDao avaliacaoDao = new AvaliacaoDao();
         if (usuario != null) {
             inscrito = inscricaoDao.existsInscricao(usuario.getId(), id);
+            presencaConfirmada = inscricaoDao.existsPresenca(usuario.getId(), id);
             req.setAttribute("favoritado", new FavoritoDao().existsFavorito(usuario.getId(), id));
-            podeAvaliar = inscrito
+            podeAvaliar = presencaConfirmada
                     && evento.getData().isBefore(LocalDate.now())
                     && !avaliacaoDao.existsByUsuarioEvento(usuario.getId(), id);
         }
@@ -69,6 +74,7 @@ public class EventoDetalheServlet extends HttpServlet {
         req.setAttribute("evento", evento);
         req.setAttribute("vagasRestantes", vagasRestantes);
         req.setAttribute("inscrito", inscrito);
+        req.setAttribute("presencaConfirmada", presencaConfirmada);
         req.getRequestDispatcher("/evento.jsp").forward(req, resp);
     }
 }

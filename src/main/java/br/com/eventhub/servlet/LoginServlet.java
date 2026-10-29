@@ -16,6 +16,11 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+        if (session != null && session.getAttribute("usuarioLogado") != null) {
+            resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+            return;
+        }
         req.getRequestDispatcher("login.jsp").forward(req, resp);
     }
 
@@ -30,9 +35,10 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        User usuario = new UserDao().findByLogin(identificador, senha);
+        UserDao userDao = new UserDao();
+        User usuario = userDao.findByLogin(identificador, senha);
         if (usuario == null) {
-            req.setAttribute("erro", "Usuário ou senha inválidos.");
+            req.setAttribute("erro", userDao.isErroLogin() ? "Não foi possível acessar sua conta agora. Tente novamente." : "Usuário ou senha inválidos.");
             req.getRequestDispatcher("login.jsp").forward(req, resp);
             return;
         }
