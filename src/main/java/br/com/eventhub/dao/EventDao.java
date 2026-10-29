@@ -11,7 +11,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -217,40 +216,27 @@ public class EventDao {
         }
     }
 
-    public List<Event> search(String nome, Integer categoriaId, String cidade, LocalDate data, int usuarioId) {
-        String SQL = "SELECT DISTINCT E.* FROM EVENTO E LEFT JOIN EVENTO_CATEGORIA EC ON E.ID = EC.EVENTO_ID WHERE (E.PUBLICO = TRUE OR E.CRIADOR_ID = ?)";
-        if (nome != null) {
-            SQL += " AND UPPER(E.NOME) LIKE UPPER(?)";
-        }
-        if (categoriaId != null) {
-            SQL += " AND EC.CATEGORIA_ID = ?";
-        }
-        if (cidade != null) {
-            SQL += " AND UPPER(E.CIDADE) LIKE UPPER(?)";
-        }
-        if (data != null) {
-            SQL += " AND E.DATA_EVENTO = ?";
-        }
-        SQL += " ORDER BY E.DATA_EVENTO";
+    public List<Event> search(String nome, int categoriaId, String cidade, String data, int usuarioId) {
+        String SQL = "SELECT * FROM EVENTO WHERE (PUBLICO = TRUE OR CRIADOR_ID = ?)"
+                + " AND (? = '' OR UPPER(NOME) LIKE UPPER(?))"
+                + " AND (? = '' OR UPPER(CIDADE) LIKE UPPER(?))"
+                + " AND (? = '' OR CAST(DATA_EVENTO AS VARCHAR) = ?)"
+                + " AND (? = 0 OR ID IN (SELECT EVENTO_ID FROM EVENTO_CATEGORIA WHERE CATEGORIA_ID = ?))"
+                + " ORDER BY DATA_EVENTO";
         List<Event> eventos = new ArrayList<>();
         try {
             Connection connection = ConnectionFactory.getConnection();
             System.out.println("success in database connection");
             PreparedStatement preparedStatement = connection.prepareStatement(SQL);
-            int indice = 1;
-            preparedStatement.setInt(indice++, usuarioId);
-            if (nome != null) {
-                preparedStatement.setString(indice++, "%" + nome + "%");
-            }
-            if (categoriaId != null) {
-                preparedStatement.setInt(indice++, categoriaId);
-            }
-            if (cidade != null) {
-                preparedStatement.setString(indice++, "%" + cidade + "%");
-            }
-            if (data != null) {
-                preparedStatement.setDate(indice, Date.valueOf(data));
-            }
+            preparedStatement.setInt(1, usuarioId);
+            preparedStatement.setString(2, nome);
+            preparedStatement.setString(3, "%" + nome + "%");
+            preparedStatement.setString(4, cidade);
+            preparedStatement.setString(5, "%" + cidade + "%");
+            preparedStatement.setString(6, data);
+            preparedStatement.setString(7, data);
+            preparedStatement.setInt(8, categoriaId);
+            preparedStatement.setInt(9, categoriaId);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 eventos.add(montarEvento(resultSet));

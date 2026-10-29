@@ -10,7 +10,7 @@ public class ConnectionFactory {
     private static final BasicDataSource dataSource = new BasicDataSource();
 
     static {
-        dataSource.setUrl("jdbc:h2:~/test;INIT=RUNSCRIPT FROM 'classpath:schema.sql'");
+        dataSource.setUrl("jdbc:h2:~/test");
         dataSource.setUsername("sa");
         dataSource.setPassword("sa");
         dataSource.setMinIdle(5);

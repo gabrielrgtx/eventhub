@@ -21,6 +21,33 @@ public class Event {
     private Endereco endereco;
     private List<Categoria> categorias = new ArrayList<>();
     private List<ImagemEvento> imagens = new ArrayList<>();
+    private int vagasRestantes;
+    private boolean inscrito;
+    private boolean favoritado;
+
+    public boolean isFavoritado() {
+        return favoritado;
+    }
+
+    public void setFavoritado(boolean favoritado) {
+        this.favoritado = favoritado;
+    }
+
+    public int getVagasRestantes() {
+        return vagasRestantes;
+    }
+
+    public void setVagasRestantes(int vagasRestantes) {
+        this.vagasRestantes = vagasRestantes;
+    }
+
+    public boolean isInscrito() {
+        return inscrito;
+    }
+
+    public void setInscrito(boolean inscrito) {
+        this.inscrito = inscrito;
+    }
 
     public int getId() {
         return id;
