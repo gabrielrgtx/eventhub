@@ -1,5 +1,6 @@
 <%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,7 +25,7 @@
                 </tr>
                 <c:forEach var="evento" items="${criados}">
                     <tr>
-                        <td>${evento.nome}</td>
+                        <td><a href="/evento?id=${evento.id}">${fn:escapeXml(evento.nome)}</a></td>
                         <td>${evento.data}</td>
                         <td>${evento.vagas}</td>
                         <td>${evento.cancelado ? 'Cancelado' : 'Ativo'}</td>
@@ -49,7 +50,7 @@
                 </tr>
                 <c:forEach var="evento" items="${vou}">
                     <tr>
-                        <td>${evento.nome}</td>
+                        <td><a href="/evento?id=${evento.id}">${fn:escapeXml(evento.nome)}</a></td>
                         <td>${evento.data}</td>
                         <td>${evento.vagas}</td>
                         <td>${evento.cancelado ? 'Cancelado' : 'Ativo'}</td>
@@ -74,7 +75,32 @@
                 </tr>
                 <c:forEach var="evento" items="${fui}">
                     <tr>
-                        <td>${evento.nome}</td>
+                        <td><a href="/evento?id=${evento.id}">${fn:escapeXml(evento.nome)}</a></td>
+                        <td>${evento.data}</td>
+                        <td>${evento.vagas}</td>
+                        <td>${evento.cancelado ? 'Cancelado' : 'Ativo'}</td>
+                    </tr>
+                </c:forEach>
+            </table>
+        </c:otherwise>
+    </c:choose>
+
+    <h2>Meus favoritos</h2>
+    <c:choose>
+        <c:when test="${empty favoritos}">
+            <p>Você ainda não favoritou nenhum evento.</p>
+        </c:when>
+        <c:otherwise>
+            <table border="1">
+                <tr>
+                    <th>Nome</th>
+                    <th>Data</th>
+                    <th>Vagas</th>
+                    <th>Situação</th>
+                </tr>
+                <c:forEach var="evento" items="${favoritos}">
+                    <tr>
+                        <td><a href="/evento?id=${evento.id}">${fn:escapeXml(evento.nome)}</a></td>
                         <td>${evento.data}</td>
                         <td>${evento.vagas}</td>
                         <td>${evento.cancelado ? 'Cancelado' : 'Ativo'}</td>

@@ -39,6 +39,7 @@ public class DashboardServlet extends HttpServlet {
         }
         req.setAttribute("vou", vou);
         req.setAttribute("fui", fui);
+        req.setAttribute("favoritos", new EventDao().findByFavorito(usuarioId));
         req.getRequestDispatcher("/painel.jsp").forward(req, resp);
     }
 }

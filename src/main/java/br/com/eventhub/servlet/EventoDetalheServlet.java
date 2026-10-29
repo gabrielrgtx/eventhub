@@ -1,5 +1,6 @@
 package br.com.eventhub.servlet;
 
+import br.com.eventhub.dao.AvaliacaoDao;
 import br.com.eventhub.dao.CategoriaDao;
 import br.com.eventhub.dao.EventDao;
 import br.com.eventhub.dao.EventoCategoriaDao;
@@ -17,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @WebServlet("/evento")
@@ -24,7 +26,13 @@ public class EventoDetalheServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        int id = Integer.parseInt(req.getParameter("id"));
+        int id;
+        try {
+            id = Integer.parseInt(req.getParameter("id"));
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+            return;
+        }
         Event evento = new EventDao().findEventById(id);
         if (evento == null) {
             resp.sendRedirect(req.getContextPath() + "/listar-eventos");
@@ -42,10 +50,17 @@ public class EventoDetalheServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
         boolean inscrito = false;
+        boolean podeAvaliar = false;
+        AvaliacaoDao avaliacaoDao = new AvaliacaoDao();
         if (usuario != null) {
             inscrito = inscricaoDao.existsInscricao(usuario.getId(), id);
             req.setAttribute("favoritado", new FavoritoDao().existsFavorito(usuario.getId(), id));
+            podeAvaliar = inscrito
+                    && evento.getData().isBefore(LocalDate.now())
+                    && !avaliacaoDao.existsByUsuarioEvento(usuario.getId(), id);
         }
+        req.setAttribute("avaliacoes", avaliacaoDao.findByEvento(id));
+        req.setAttribute("podeAvaliar", podeAvaliar);
         req.setAttribute("evento", evento);
         req.setAttribute("vagasRestantes", vagasRestantes);
         req.setAttribute("inscrito", inscrito);
