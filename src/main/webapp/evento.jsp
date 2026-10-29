@@ -12,6 +12,7 @@
     <c:if test="${evento.cancelado}">
         <p><strong>Evento cancelado</strong></p>
     </c:if>
+    <p>Criado por <a href="/usuario?id=${evento.criador.id}">${fn:escapeXml(evento.criador.nome)}</a></p>
     <p>${fn:escapeXml(evento.sobre)}</p>
     <c:if test="${not empty evento.categorias}">
         <p>Categorias:
@@ -98,10 +99,23 @@
         <c:otherwise>
             <c:forEach var="avaliacao" items="${avaliacoes}">
                 <p>
-                    <strong>${fn:escapeXml(avaliacao.usuario.nome)}</strong> - nota ${avaliacao.nota}<br>
+                    <strong><a href="/usuario?id=${avaliacao.usuario.id}">${fn:escapeXml(avaliacao.usuario.nome)}</a></strong> - nota ${avaliacao.nota}<br>
                     ${fn:escapeXml(avaliacao.comentario)}
                 </p>
                 <c:if test="${not empty usuarioLogado and usuarioLogado.id == avaliacao.usuario.id}">
+                    <form action="/avaliacao" method="post">
+                        <input type="hidden" name="eventoId" value="${evento.id}">
+                        <input type="hidden" name="avaliacaoId" value="${avaliacao.id}">
+                        <input type="hidden" name="acao" value="editar">
+                        <label>Nota</label>
+                        <select name="nota">
+                            <c:forEach var="n" begin="1" end="5">
+                                <option value="${6 - n}" ${avaliacao.nota == 6 - n ? 'selected' : ''}>${6 - n}</option>
+                            </c:forEach>
+                        </select><br>
+                        <textarea name="comentario" maxlength="1000">${fn:escapeXml(avaliacao.comentario)}</textarea><br>
+                        <button type="submit">Salvar alteração</button>
+                    </form>
                     <form action="/avaliacao" method="post">
                         <input type="hidden" name="eventoId" value="${evento.id}">
                         <input type="hidden" name="avaliacaoId" value="${avaliacao.id}">

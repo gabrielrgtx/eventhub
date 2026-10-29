@@ -7,6 +7,7 @@ import br.com.eventhub.dao.EventoCategoriaDao;
 import br.com.eventhub.dao.FavoritoDao;
 import br.com.eventhub.dao.ImagemEventoDao;
 import br.com.eventhub.dao.InscricaoDao;
+import br.com.eventhub.dao.UserDao;
 import br.com.eventhub.model.Categoria;
 import br.com.eventhub.model.Event;
 import br.com.eventhub.model.User;
@@ -45,6 +46,10 @@ public class EventoDetalheServlet extends HttpServlet {
             }
         }
         evento.setImagens(new ImagemEventoDao().findByEvento(id));
+        User criador = new UserDao().findById(evento.getCriador().getId());
+        if (criador != null) {
+            evento.setCriador(criador);
+        }
         InscricaoDao inscricaoDao = new InscricaoDao();
         int vagasRestantes = evento.getVagas() - inscricaoDao.countByEvento(id);
         HttpSession session = req.getSession(false);

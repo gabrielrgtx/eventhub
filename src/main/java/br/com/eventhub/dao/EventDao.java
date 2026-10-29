@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -208,6 +209,53 @@ public class EventDao {
                 eventos.add(montarEvento(resultSet));
             }
             System.out.println("success in find events by inscrito");
+            connection.close();
+            return eventos;
+        } catch (Exception e) {
+            System.out.println("fail in database connection");
+            return Collections.emptyList();
+        }
+    }
+
+    public List<Event> search(String nome, Integer categoriaId, String cidade, LocalDate data, int usuarioId) {
+        String SQL = "SELECT DISTINCT E.* FROM EVENTO E LEFT JOIN EVENTO_CATEGORIA EC ON E.ID = EC.EVENTO_ID WHERE (E.PUBLICO = TRUE OR E.CRIADOR_ID = ?)";
+        if (nome != null) {
+            SQL += " AND UPPER(E.NOME) LIKE UPPER(?)";
+        }
+        if (categoriaId != null) {
+            SQL += " AND EC.CATEGORIA_ID = ?";
+        }
+        if (cidade != null) {
+            SQL += " AND UPPER(E.CIDADE) LIKE UPPER(?)";
+        }
+        if (data != null) {
+            SQL += " AND E.DATA_EVENTO = ?";
+        }
+        SQL += " ORDER BY E.DATA_EVENTO";
+        List<Event> eventos = new ArrayList<>();
+        try {
+            Connection connection = ConnectionFactory.getConnection();
+            System.out.println("success in database connection");
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            int indice = 1;
+            preparedStatement.setInt(indice++, usuarioId);
+            if (nome != null) {
+                preparedStatement.setString(indice++, "%" + nome + "%");
+            }
+            if (categoriaId != null) {
+                preparedStatement.setInt(indice++, categoriaId);
+            }
+            if (cidade != null) {
+                preparedStatement.setString(indice++, "%" + cidade + "%");
+            }
+            if (data != null) {
+                preparedStatement.setDate(indice, Date.valueOf(data));
+            }
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                eventos.add(montarEvento(resultSet));
+            }
+            System.out.println("success in search events");
             connection.close();
             return eventos;
         } catch (Exception e) {

@@ -9,6 +9,22 @@
 </head>
 <body>
     <h1>Eventos</h1>
+    <form action="/listar-eventos" method="get">
+        <input type="text" name="nome" placeholder="Buscar por nome" value="${fn:escapeXml(param.nome)}">
+        <select name="categoria">
+            <option value="">Todas as categorias</option>
+            <c:forEach var="c" items="${categorias}">
+                <option value="${c.id}" ${param.categoria == c.id ? 'selected' : ''}>${fn:escapeXml(c.nome)}</option>
+            </c:forEach>
+        </select>
+        <input type="text" name="cidade" placeholder="Cidade" value="${fn:escapeXml(param.cidade)}">
+        <input type="date" name="data" value="${fn:escapeXml(param.data)}">
+        <button type="submit">Buscar</button>
+        <a href="/listar-eventos">Limpar</a>
+    </form>
+    <c:if test="${empty eventos}">
+        <p>Nenhum evento encontrado.</p>
+    </c:if>
     <table border="1">
         <tr>
             <th>ID</th>
@@ -32,16 +48,31 @@
                             <button type="submit">Delete</button>
                         </form>
                     </c:if>
-                    <form action="/inscricao" method="post">
-                        <input type="hidden" name="acao" value="inscrever">
-                        <input type="hidden" name="eventoId" value="${evento.id}">
-                        <button type="submit">Inscrever-se</button>
-                    </form>
-                    <form action="/inscricao" method="post">
-                        <input type="hidden" name="acao" value="cancelar">
-                        <input type="hidden" name="eventoId" value="${evento.id}">
-                        <button type="submit">Cancelar inscrição</button>
-                    </form>
+                    <c:choose>
+                        <c:when test="${empty usuarioLogado}">
+                            <a href="/login">Entre para se inscrever</a>
+                        </c:when>
+                        <c:when test="${inscritos.contains(evento.id)}">
+                            <form action="/inscricao" method="post">
+                                <input type="hidden" name="acao" value="cancelar">
+                                <input type="hidden" name="eventoId" value="${evento.id}">
+                                <button type="submit">Cancelar inscrição</button>
+                            </form>
+                        </c:when>
+                        <c:when test="${evento.cancelado}">
+                            Cancelado
+                        </c:when>
+                        <c:when test="${vagasRestantes[evento.id] <= 0}">
+                            Esgotado
+                        </c:when>
+                        <c:otherwise>
+                            <form action="/inscricao" method="post">
+                                <input type="hidden" name="acao" value="inscrever">
+                                <input type="hidden" name="eventoId" value="${evento.id}">
+                                <button type="submit">Inscrever-se</button>
+                            </form>
+                        </c:otherwise>
+                    </c:choose>
                 </td>
             </tr>
         </c:forEach>
