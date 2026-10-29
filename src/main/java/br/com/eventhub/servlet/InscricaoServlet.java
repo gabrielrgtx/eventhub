@@ -40,6 +40,6 @@ public class InscricaoServlet extends HttpServlet {
         } else if ("cancelar".equals(acao)) {
             inscricaoDao.deleteInscricao(usuarioId, eventoId);
         }
-        resp.sendRedirect("/listar-eventos");
+        resp.sendRedirect(req.getContextPath() + "/evento?id=" + eventoId);
     }
 }

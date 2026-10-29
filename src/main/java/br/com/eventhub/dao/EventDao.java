@@ -9,6 +9,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,12 +17,12 @@ import java.util.List;
 
 public class EventDao {
 
-    public void createEvent(Event evento) {
+    public int createEvent(Event evento) {
         String SQL = "INSERT INTO EVENTO (NOME, SOBRE, DATA_EVENTO, INICIO, FIM, VAGAS, PUBLICO, CANCELADO, CRIADOR_ID, RUA, NUMERO, BAIRRO, CIDADE, ESTADO, CEP) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try {
             Connection connection = ConnectionFactory.getConnection();
             System.out.println("success in database connection");
-            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, evento.getNome());
             preparedStatement.setString(2, evento.getSobre());
             preparedStatement.setDate(3, Date.valueOf(evento.getData()));
@@ -38,10 +39,17 @@ public class EventDao {
             preparedStatement.setString(14, evento.getEndereco().getEstado());
             preparedStatement.setString(15, evento.getEndereco().getCep());
             preparedStatement.execute();
+            ResultSet resultSet = preparedStatement.getGeneratedKeys();
+            int id = 0;
+            if (resultSet.next()) {
+                id = resultSet.getInt(1);
+            }
             System.out.println("success in insert event");
             connection.close();
+            return id;
         } catch (Exception e) {
             System.out.println("fail in database connection");
+            return 0;
         }
     }
 

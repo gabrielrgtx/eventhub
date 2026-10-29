@@ -1,6 +1,9 @@
 package br.com.eventhub.servlet;
 
+import br.com.eventhub.dao.CategoriaDao;
 import br.com.eventhub.dao.EventDao;
+import br.com.eventhub.dao.EventoCategoriaDao;
+import br.com.eventhub.dao.ImagemEventoDao;
 import br.com.eventhub.model.Event;
 import br.com.eventhub.model.User;
 
@@ -30,6 +33,9 @@ public class EditEventServlet extends HttpServlet {
             return;
         }
         req.setAttribute("evento", evento);
+        req.setAttribute("categorias", new CategoriaDao().findAll());
+        req.setAttribute("categoriasEvento", new EventoCategoriaDao().findCategoriaIdsByEvento(id));
+        req.setAttribute("imagensEvento", new ImagemEventoDao().findByEvento(id));
         req.getRequestDispatcher("/index.jsp").forward(req, resp);
     }
 }
