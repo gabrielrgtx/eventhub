@@ -50,8 +50,19 @@ public class CreateEventServlet extends HttpServlet {
             evento.setCriador(criador);
             new EventDao().createEvent(evento);
         } else {
+            HttpSession session = req.getSession(false);
+            User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
+            if (usuario == null) {
+                resp.sendRedirect(req.getContextPath() + "/login");
+                return;
+            }
             evento.setId(Integer.parseInt(id));
-            evento.setCancelado(new EventDao().findEventById(evento.getId()).isCancelado());
+            Event atual = new EventDao().findEventById(evento.getId());
+            if (atual == null || atual.getCriador().getId() != usuario.getId()) {
+                resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+                return;
+            }
+            evento.setCancelado(atual.isCancelado());
             new EventDao().updateEvent(evento);
         }
         resp.sendRedirect("/listar-eventos");

@@ -187,6 +187,27 @@ public class EventDao {
         }
     }
 
+    public List<Event> findByInscrito(int usuarioId) {
+        String SQL = "SELECT E.* FROM EVENTO E INNER JOIN INSCRICAO I ON E.ID = I.EVENTO_ID WHERE I.USUARIO_ID = ?";
+        List<Event> eventos = new ArrayList<>();
+        try {
+            Connection connection = ConnectionFactory.getConnection();
+            System.out.println("success in database connection");
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            preparedStatement.setInt(1, usuarioId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                eventos.add(montarEvento(resultSet));
+            }
+            System.out.println("success in find events by inscrito");
+            connection.close();
+            return eventos;
+        } catch (Exception e) {
+            System.out.println("fail in database connection");
+            return Collections.emptyList();
+        }
+    }
+
     private Event montarEvento(ResultSet resultSet) throws SQLException {
         Event evento = new Event();
         evento.setId(resultSet.getInt("ID"));
