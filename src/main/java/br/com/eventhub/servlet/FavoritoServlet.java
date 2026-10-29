@@ -22,7 +22,13 @@ public class FavoritoServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
-        int eventoId = Integer.parseInt(req.getParameter("eventoId"));
+        int eventoId;
+        try {
+            eventoId = Integer.parseInt(req.getParameter("eventoId"));
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+            return;
+        }
         String acao = req.getParameter("acao");
         FavoritoDao favoritoDao = new FavoritoDao();
         if ("favoritar".equals(acao)) {

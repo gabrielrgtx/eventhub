@@ -1,5 +1,9 @@
 <%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
+<c:if test="${categorias == null}">
+    <c:redirect url="/novo-evento"/>
+</c:if>
 <!DOCTYPE html>
 <html>
 <head>
@@ -13,10 +17,10 @@
         <input type="hidden" name="id" value="${evento.id}">
 
         <label>Nome</label>
-        <input type="text" name="nome" value="${evento.nome}" required><br>
+        <input type="text" name="nome" value="${fn:escapeXml(evento.nome)}" required><br>
 
         <label>Sobre</label>
-        <textarea name="sobre">${evento.sobre}</textarea><br>
+        <textarea name="sobre">${fn:escapeXml(evento.sobre)}</textarea><br>
 
         <label>Data</label>
         <input type="date" name="data" value="${evento.data}" required><br>
@@ -35,31 +39,31 @@
 
         <h3>Endereço</h3>
         <label>Rua</label>
-        <input type="text" name="rua" value="${evento.endereco.rua}"><br>
+        <input type="text" name="rua" value="${fn:escapeXml(evento.endereco.rua)}"><br>
 
         <label>Número</label>
-        <input type="text" name="numero" value="${evento.endereco.numero}"><br>
+        <input type="text" name="numero" value="${fn:escapeXml(evento.endereco.numero)}"><br>
 
         <label>Bairro</label>
-        <input type="text" name="bairro" value="${evento.endereco.bairro}"><br>
+        <input type="text" name="bairro" value="${fn:escapeXml(evento.endereco.bairro)}"><br>
 
         <label>Cidade</label>
-        <input type="text" name="cidade" value="${evento.endereco.cidade}"><br>
+        <input type="text" name="cidade" value="${fn:escapeXml(evento.endereco.cidade)}"><br>
 
         <label>Estado</label>
-        <input type="text" name="estado" value="${evento.endereco.estado}" maxlength="2"><br>
+        <input type="text" name="estado" value="${fn:escapeXml(evento.endereco.estado)}" maxlength="2"><br>
 
         <label>CEP</label>
-        <input type="text" name="cep" value="${evento.endereco.cep}"><br>
+        <input type="text" name="cep" value="${fn:escapeXml(evento.endereco.cep)}"><br>
 
         <h3>Categorias</h3>
         <c:forEach var="c" items="${categorias}">
-            <label><input type="checkbox" name="categorias" value="${c.id}" ${categoriasEvento.contains(c.id) ? 'checked' : ''}> ${c.nome}</label><br>
+            <label><input type="checkbox" name="categorias" value="${c.id}" ${categoriasEvento.contains(c.id) ? 'checked' : ''}> ${fn:escapeXml(c.nome)}</label><br>
         </c:forEach>
 
         <h3>Imagens</h3>
-        <label>URLs das imagens (uma por linha)</label><br>
-        <textarea name="imagens" rows="4" cols="60"><c:forEach var="img" items="${imagensEvento}">${img.caminho}
+        <label>URLs das imagens (uma por linha, começando com http:// ou https://)</label><br>
+        <textarea name="imagens" rows="4" cols="60"><c:forEach var="img" items="${imagensEvento}">${fn:escapeXml(img.caminho)}
 </c:forEach></textarea><br>
 
         <button type="submit">Salvar</button>

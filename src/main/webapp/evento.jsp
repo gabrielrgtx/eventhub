@@ -1,23 +1,28 @@
 <%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>${evento.nome}</title>
+    <title>${fn:escapeXml(evento.nome)}</title>
 </head>
 <body>
-    <h1>${evento.nome}</h1>
-    <p>${evento.sobre}</p>
+    <h1>${fn:escapeXml(evento.nome)}</h1>
+    <c:if test="${evento.cancelado}">
+        <p><strong>Evento cancelado</strong></p>
+    </c:if>
+    <p>Criado por <a href="/usuario?id=${evento.criador.id}">${fn:escapeXml(evento.criador.nome)}</a></p>
+    <p>${fn:escapeXml(evento.sobre)}</p>
     <c:if test="${not empty evento.categorias}">
         <p>Categorias:
             <c:forEach var="categoria" items="${evento.categorias}" varStatus="status">
-                ${categoria.nome}${status.last ? '' : ', '}
+                ${fn:escapeXml(categoria.nome)}${status.last ? '' : ', '}
             </c:forEach>
         </p>
     </c:if>
     <c:forEach var="img" items="${evento.imagens}">
-        <img src="${img.caminho}" width="200">
+        <img src="${fn:escapeXml(img.caminho)}" width="200">
     </c:forEach>
 
     <p>Data: ${evento.data}</p>
@@ -27,12 +32,12 @@
     </c:if>
 
     <h2>Endereço</h2>
-    <p>Rua: ${evento.endereco.rua}</p>
-    <p>Número: ${evento.endereco.numero}</p>
-    <p>Bairro: ${evento.endereco.bairro}</p>
-    <p>Cidade: ${evento.endereco.cidade}</p>
-    <p>Estado: ${evento.endereco.estado}</p>
-    <p>CEP: ${evento.endereco.cep}</p>
+    <p>Rua: ${fn:escapeXml(evento.endereco.rua)}</p>
+    <p>Número: ${fn:escapeXml(evento.endereco.numero)}</p>
+    <p>Bairro: ${fn:escapeXml(evento.endereco.bairro)}</p>
+    <p>Cidade: ${fn:escapeXml(evento.endereco.cidade)}</p>
+    <p>Estado: ${fn:escapeXml(evento.endereco.estado)}</p>
+    <p>CEP: ${fn:escapeXml(evento.endereco.cep)}</p>
 
     <c:choose>
         <c:when test="${vagasRestantes <= 0}">
@@ -54,13 +59,13 @@
                 <button type="submit">Cancelar inscrição</button>
             </form>
         </c:when>
-        <c:otherwise>
+        <c:when test="${not evento.cancelado and vagasRestantes > 0}">
             <form action="/inscricao" method="post">
                 <input type="hidden" name="eventoId" value="${evento.id}">
                 <input type="hidden" name="acao" value="inscrever">
                 <button type="submit">Inscrever-se</button>
             </form>
-        </c:otherwise>
+        </c:when>
     </c:choose>
 
     <c:choose>
@@ -82,6 +87,62 @@
             </form>
         </c:otherwise>
     </c:choose>
+
+    <h2>Avaliações</h2>
+    <c:if test="${not empty param.erro}">
+        <p>Não foi possível avaliar: ${fn:escapeXml(param.erro)}</p>
+    </c:if>
+    <c:choose>
+        <c:when test="${empty avaliacoes}">
+            <p>Nenhuma avaliação ainda.</p>
+        </c:when>
+        <c:otherwise>
+            <c:forEach var="avaliacao" items="${avaliacoes}">
+                <p>
+                    <strong><a href="/usuario?id=${avaliacao.usuario.id}">${fn:escapeXml(avaliacao.usuario.nome)}</a></strong> - nota ${avaliacao.nota}<br>
+                    ${fn:escapeXml(avaliacao.comentario)}
+                </p>
+                <c:if test="${not empty usuarioLogado and usuarioLogado.id == avaliacao.usuario.id}">
+                    <form action="/avaliacao" method="post">
+                        <input type="hidden" name="eventoId" value="${evento.id}">
+                        <input type="hidden" name="avaliacaoId" value="${avaliacao.id}">
+                        <input type="hidden" name="acao" value="editar">
+                        <label>Nota</label>
+                        <select name="nota">
+                            <c:forEach var="n" begin="1" end="5">
+                                <option value="${6 - n}" ${avaliacao.nota == 6 - n ? 'selected' : ''}>${6 - n}</option>
+                            </c:forEach>
+                        </select><br>
+                        <textarea name="comentario" maxlength="1000">${fn:escapeXml(avaliacao.comentario)}</textarea><br>
+                        <button type="submit">Salvar alteração</button>
+                    </form>
+                    <form action="/avaliacao" method="post">
+                        <input type="hidden" name="eventoId" value="${evento.id}">
+                        <input type="hidden" name="avaliacaoId" value="${avaliacao.id}">
+                        <input type="hidden" name="acao" value="excluir">
+                        <button type="submit">Excluir minha avaliação</button>
+                    </form>
+                </c:if>
+            </c:forEach>
+        </c:otherwise>
+    </c:choose>
+    <c:if test="${podeAvaliar}">
+        <form action="/avaliacao" method="post">
+            <input type="hidden" name="eventoId" value="${evento.id}">
+            <input type="hidden" name="acao" value="criar">
+            <label>Nota</label>
+            <select name="nota">
+                <option value="5">5</option>
+                <option value="4">4</option>
+                <option value="3">3</option>
+                <option value="2">2</option>
+                <option value="1">1</option>
+            </select><br>
+            <label>Comentário</label><br>
+            <textarea name="comentario" maxlength="1000"></textarea><br>
+            <button type="submit">Avaliar</button>
+        </form>
+    </c:if>
 
     <p><a href="/listar-eventos">Voltar para os eventos</a></p>
 </body>

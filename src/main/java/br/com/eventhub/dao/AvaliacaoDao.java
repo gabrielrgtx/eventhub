@@ -1,6 +1,7 @@
 package br.com.eventhub.dao;
 
 import br.com.eventhub.model.Avaliacao;
+import br.com.eventhub.model.Event;
 import br.com.eventhub.model.User;
 
 import java.sql.Connection;
@@ -53,6 +54,37 @@ public class AvaliacaoDao {
                 avaliacoes.add(avaliacao);
             }
             System.out.println("success in find avaliacoes by evento");
+            connection.close();
+            return avaliacoes;
+        } catch (Exception e) {
+            System.out.println("fail in database connection");
+            return Collections.emptyList();
+        }
+    }
+
+    public List<Avaliacao> findByUsuario(int usuarioId) {
+        String SQL = "SELECT A.ID, A.NOTA, A.COMENTARIO, A.DATA_AVALIACAO, E.ID AS EVENTO_ID, E.NOME "
+                + "FROM AVALIACAO A JOIN EVENTO E ON E.ID = A.EVENTO_ID WHERE A.USUARIO_ID = ?";
+        List<Avaliacao> avaliacoes = new ArrayList<>();
+        try {
+            Connection connection = ConnectionFactory.getConnection();
+            System.out.println("success in database connection");
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            preparedStatement.setInt(1, usuarioId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                Avaliacao avaliacao = new Avaliacao();
+                avaliacao.setId(resultSet.getInt("ID"));
+                avaliacao.setNota(resultSet.getInt("NOTA"));
+                avaliacao.setComentario(resultSet.getString("COMENTARIO"));
+                avaliacao.setData(resultSet.getTimestamp("DATA_AVALIACAO").toLocalDateTime());
+                Event evento = new Event();
+                evento.setId(resultSet.getInt("EVENTO_ID"));
+                evento.setNome(resultSet.getString("NOME"));
+                avaliacao.setEvento(evento);
+                avaliacoes.add(avaliacao);
+            }
+            System.out.println("success in find avaliacoes by usuario");
             connection.close();
             return avaliacoes;
         } catch (Exception e) {

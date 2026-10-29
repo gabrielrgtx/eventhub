@@ -1,5 +1,6 @@
 <%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,7 +28,7 @@
                 <input type="hidden" name="acao" value="editar">
                 <input type="hidden" name="id" value="${categoriaEdicao.id}">
                 <label>Nome</label>
-                <input type="text" name="nome" value="${categoriaEdicao.nome}" maxlength="100">
+                <input type="text" name="nome" value="${fn:escapeXml(categoriaEdicao.nome)}" maxlength="100">
                 <button type="submit">Salvar</button>
             </form>
             <p><a href="/categorias">Cancelar edição</a></p>
@@ -49,7 +50,7 @@
                 <c:forEach var="categoria" items="${categorias}">
                     <tr>
                         <td>${categoria.id}</td>
-                        <td>${categoria.nome}</td>
+                        <td>${fn:escapeXml(categoria.nome)}</td>
                         <td>
                             <a href="/categorias?editar=${categoria.id}">Editar</a>
                             <form action="/categorias" method="post" onsubmit="return confirm('Excluir esta categoria?');">

@@ -25,7 +25,13 @@ public class InscricaoServlet extends HttpServlet {
             return;
         }
         int usuarioId = usuario.getId();
-        int eventoId = Integer.parseInt(req.getParameter("eventoId"));
+        int eventoId;
+        try {
+            eventoId = Integer.parseInt(req.getParameter("eventoId"));
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+            return;
+        }
         String acao = req.getParameter("acao");
         InscricaoDao inscricaoDao = new InscricaoDao();
         if ("inscrever".equals(acao)) {

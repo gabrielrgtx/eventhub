@@ -23,7 +23,13 @@ public class CancelEventServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
-        int id = Integer.parseInt(req.getParameter("id"));
+        int id;
+        try {
+            id = Integer.parseInt(req.getParameter("id"));
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+            return;
+        }
         Event evento = new EventDao().findEventById(id);
         if (evento == null || evento.getCriador().getId() != usuario.getId()) {
             resp.sendRedirect(req.getContextPath() + "/listar-eventos");

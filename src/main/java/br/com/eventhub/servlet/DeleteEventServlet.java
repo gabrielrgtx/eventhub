@@ -24,7 +24,13 @@ public class DeleteEventServlet extends HttpServlet {
             return;
         }
         String eventId = req.getParameter("id");
-        Event evento = new EventDao().findEventById(Integer.parseInt(eventId));
+        Event evento;
+        try {
+            evento = new EventDao().findEventById(Integer.parseInt(eventId));
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+            return;
+        }
         if (evento == null || evento.getCriador().getId() != usuario.getId()) {
             resp.sendRedirect(req.getContextPath() + "/listar-eventos");
             return;

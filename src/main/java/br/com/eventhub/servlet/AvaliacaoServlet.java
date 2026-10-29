@@ -29,8 +29,14 @@ public class AvaliacaoServlet extends HttpServlet {
         }
 
         String acao = req.getParameter("acao");
-        int eventoId = Integer.parseInt(req.getParameter("eventoId"));
-        String destino = req.getContextPath() + "/listar-eventos";
+        int eventoId;
+        try {
+            eventoId = Integer.parseInt(req.getParameter("eventoId"));
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+            return;
+        }
+        String destino = req.getContextPath() + "/evento?id=" + eventoId;
 
         AvaliacaoDao avaliacaoDao = new AvaliacaoDao();
 
@@ -39,23 +45,23 @@ public class AvaliacaoServlet extends HttpServlet {
             String comentario = req.getParameter("comentario");
 
             if (nota < 1 || nota > 5) {
-                resp.sendRedirect(destino + "?erro=nota-invalida");
+                resp.sendRedirect(destino + "&erro=nota-invalida");
                 return;
             }
 
             Event evento = new EventDao().findEventById(eventoId);
             if (evento == null || !evento.getData().isBefore(LocalDate.now())) {
-                resp.sendRedirect(destino + "?erro=evento-nao-realizado");
+                resp.sendRedirect(destino + "&erro=evento-nao-realizado");
                 return;
             }
 
             if (!new InscricaoDao().existsInscricao(usuario.getId(), eventoId)) {
-                resp.sendRedirect(destino + "?erro=sem-inscricao");
+                resp.sendRedirect(destino + "&erro=sem-inscricao");
                 return;
             }
 
             if (avaliacaoDao.existsByUsuarioEvento(usuario.getId(), eventoId)) {
-                resp.sendRedirect(destino + "?erro=ja-avaliou");
+                resp.sendRedirect(destino + "&erro=ja-avaliou");
                 return;
             }
 
@@ -71,7 +77,7 @@ public class AvaliacaoServlet extends HttpServlet {
             String comentario = req.getParameter("comentario");
 
             if (nota < 1 || nota > 5) {
-                resp.sendRedirect(destino + "?erro=nota-invalida");
+                resp.sendRedirect(destino + "&erro=nota-invalida");
                 return;
             }
 

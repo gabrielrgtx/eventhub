@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -12,16 +13,16 @@
 
     <form action="/perfil" method="post">
         <label>Nome</label>
-        <input type="text" name="nome" value="${usuarioLogado.nome}"><br>
+        <input type="text" name="nome" value="${fn:escapeXml(usuarioLogado.nome)}"><br>
 
         <label>Usuário</label>
-        <input type="text" name="usuario" value="${usuarioLogado.usuario}"><br>
+        <input type="text" name="usuario" value="${fn:escapeXml(usuarioLogado.usuario)}"><br>
 
         <label>E-mail</label>
-        <input type="email" name="email" value="${usuarioLogado.email}"><br>
+        <input type="email" name="email" value="${fn:escapeXml(usuarioLogado.email)}"><br>
 
         <label>Foto (caminho)</label>
-        <input type="text" name="foto" value="${usuarioLogado.foto}"><br>
+        <input type="text" name="foto" value="${fn:escapeXml(usuarioLogado.foto)}"><br>
 
         <button type="submit">Salvar</button>
     </form>

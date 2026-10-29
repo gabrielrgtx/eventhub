@@ -1,4 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,7 +9,7 @@
 <body>
     <h1>Cadastre-se!</h1>
 
-    <p>${erro}</p>
+    <p>${fn:escapeXml(erro)}</p>
 
     <form action="/cadastro" method="post">
         <label>Nome</label>

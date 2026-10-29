@@ -1,5 +1,6 @@
 package br.com.eventhub.servlet;
 
+import br.com.eventhub.dao.CategoriaDao;
 import br.com.eventhub.dao.EventDao;
 import br.com.eventhub.dao.EventoCategoriaDao;
 import br.com.eventhub.dao.ImagemEventoDao;
@@ -54,6 +55,10 @@ public class CreateEventServlet extends HttpServlet {
             }
             evento.setCriador(criador);
             eventoId = new EventDao().createEvent(evento);
+            if (eventoId == 0) {
+                resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+                return;
+            }
         } else {
             HttpSession session = req.getSession(false);
             User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
@@ -61,7 +66,12 @@ public class CreateEventServlet extends HttpServlet {
                 resp.sendRedirect(req.getContextPath() + "/login");
                 return;
             }
-            evento.setId(Integer.parseInt(id));
+            try {
+                evento.setId(Integer.parseInt(id));
+            } catch (NumberFormatException e) {
+                resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+                return;
+            }
             Event atual = new EventDao().findEventById(evento.getId());
             if (atual == null || atual.getCriador().getId() != usuario.getId()) {
                 resp.sendRedirect(req.getContextPath() + "/listar-eventos");
@@ -72,11 +82,19 @@ public class CreateEventServlet extends HttpServlet {
             eventoId = evento.getId();
         }
         EventoCategoriaDao eventoCategoriaDao = new EventoCategoriaDao();
+        CategoriaDao categoriaDao = new CategoriaDao();
         eventoCategoriaDao.deleteByEvento(eventoId);
         if (categorias != null) {
             for (String categoriaId : categorias) {
                 if (categoriaId != null) {
-                    eventoCategoriaDao.insertCategoria(eventoId, Integer.parseInt(categoriaId));
+                    try {
+                        int idCategoria = Integer.parseInt(categoriaId);
+                        if (categoriaDao.findById(idCategoria) != null) {
+                            eventoCategoriaDao.insertCategoria(eventoId, idCategoria);
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("categoria invalida: " + categoriaId);
+                    }
                 }
             }
         }
@@ -85,7 +103,8 @@ public class CreateEventServlet extends HttpServlet {
         if (imagens != null) {
             for (String linha : imagens.split("\n")) {
                 String caminho = linha.trim();
-                if (!caminho.isEmpty()) {
+                boolean urlValida = (caminho.startsWith("http://") || caminho.startsWith("https://")) && caminho.length() <= 500;
+                if (urlValida) {
                     imagemEventoDao.insertImagem(eventoId, caminho);
                 }
             }
