@@ -1,6 +1,8 @@
 package br.com.eventhub.servlet;
 
 import br.com.eventhub.dao.EventDao;
+import br.com.eventhub.dao.EventoCategoriaDao;
+import br.com.eventhub.dao.ImagemEventoDao;
 import br.com.eventhub.model.Endereco;
 import br.com.eventhub.model.Event;
 import br.com.eventhub.model.User;
@@ -40,6 +42,9 @@ public class CreateEventServlet extends HttpServlet {
         endereco.setEstado(req.getParameter("estado"));
         endereco.setCep(req.getParameter("cep"));
         evento.setEndereco(endereco);
+        String[] categorias = req.getParameterValues("categorias");
+        String imagens = req.getParameter("imagens");
+        int eventoId;
         if (id == null || id.isEmpty()) {
             HttpSession session = req.getSession(false);
             User criador = session == null ? null : (User) session.getAttribute("usuarioLogado");
@@ -48,7 +53,7 @@ public class CreateEventServlet extends HttpServlet {
                 return;
             }
             evento.setCriador(criador);
-            new EventDao().createEvent(evento);
+            eventoId = new EventDao().createEvent(evento);
         } else {
             HttpSession session = req.getSession(false);
             User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
@@ -64,6 +69,26 @@ public class CreateEventServlet extends HttpServlet {
             }
             evento.setCancelado(atual.isCancelado());
             new EventDao().updateEvent(evento);
+            eventoId = evento.getId();
+        }
+        EventoCategoriaDao eventoCategoriaDao = new EventoCategoriaDao();
+        eventoCategoriaDao.deleteByEvento(eventoId);
+        if (categorias != null) {
+            for (String categoriaId : categorias) {
+                if (categoriaId != null) {
+                    eventoCategoriaDao.insertCategoria(eventoId, Integer.parseInt(categoriaId));
+                }
+            }
+        }
+        ImagemEventoDao imagemEventoDao = new ImagemEventoDao();
+        imagemEventoDao.deleteByEvento(eventoId);
+        if (imagens != null) {
+            for (String linha : imagens.split("\n")) {
+                String caminho = linha.trim();
+                if (!caminho.isEmpty()) {
+                    imagemEventoDao.insertImagem(eventoId, caminho);
+                }
+            }
         }
         resp.sendRedirect("/listar-eventos");
     }

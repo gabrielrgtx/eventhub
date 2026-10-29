@@ -52,6 +52,16 @@
         <label>CEP</label>
         <input type="text" name="cep" value="${evento.endereco.cep}"><br>
 
+        <h3>Categorias</h3>
+        <c:forEach var="c" items="${categorias}">
+            <label><input type="checkbox" name="categorias" value="${c.id}" ${categoriasEvento.contains(c.id) ? 'checked' : ''}> ${c.nome}</label><br>
+        </c:forEach>
+
+        <h3>Imagens</h3>
+        <label>URLs das imagens (uma por linha)</label><br>
+        <textarea name="imagens" rows="4" cols="60"><c:forEach var="img" items="${imagensEvento}">${img.caminho}
+</c:forEach></textarea><br>
+
         <button type="submit">Salvar</button>
     </form>
 

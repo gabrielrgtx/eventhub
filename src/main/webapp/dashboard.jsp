@@ -19,6 +19,7 @@
                 <td>${evento.id}</td>
                 <td>${evento.nome}${evento.cancelado ? ' (cancelado)' : ''}</td>
                 <td>
+                    <a href="/evento?id=${evento.id}">Ver</a>
                     <a href="/editar-evento?id=${evento.id}">Editar</a>
                     <form action="/cancelar-evento" method="post">
                         <input type="hidden" name="id" value="${evento.id}">
@@ -42,7 +43,7 @@
             </tr>
         </c:forEach>
     </table>
-    <p><a href="/">Novo evento</a></p>
+    <p><a href="/novo-evento">Novo evento</a></p>
     <p><a href="/painel">Meu painel</a></p>
 </body>
 </html>

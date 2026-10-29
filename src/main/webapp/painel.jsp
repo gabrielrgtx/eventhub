@@ -84,6 +84,6 @@
         </c:otherwise>
     </c:choose>
 
-    <p><a href="/listar-eventos">Todos os eventos</a> | <a href="/">Novo evento</a></p>
+    <p><a href="/listar-eventos">Todos os eventos</a> | <a href="/novo-evento">Novo evento</a></p>
 </body>
 </html>
