@@ -18,10 +18,6 @@ public class FavoritoServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
-        if (usuario == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
-            return;
-        }
         int eventoId;
         try {
             eventoId = Integer.parseInt(req.getParameter("eventoId"));
