@@ -24,10 +24,6 @@ public class DashboardServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
-        if (usuario == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
-            return;
-        }
         int usuarioId = usuario.getId();
         ImagemEventoDao imagemEventoDao = new ImagemEventoDao();
         InscricaoDao inscricaoDao = new InscricaoDao();
