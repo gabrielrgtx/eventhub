@@ -32,6 +32,6 @@ public class CancelEventServlet extends HttpServlet {
             return;
         }
         new EventDao().cancelEventById(id);
-        resp.sendRedirect("/listar-eventos");
+        resp.sendRedirect(req.getContextPath() + "/listar-eventos");
     }
 }
