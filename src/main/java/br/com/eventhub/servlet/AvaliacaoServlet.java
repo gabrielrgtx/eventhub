@@ -23,10 +23,6 @@ public class AvaliacaoServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
-        if (usuario == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
-            return;
-        }
 
         String acao = req.getParameter("acao");
         int eventoId;
@@ -41,7 +37,13 @@ public class AvaliacaoServlet extends HttpServlet {
         AvaliacaoDao avaliacaoDao = new AvaliacaoDao();
 
         if ("criar".equals(acao)) {
-            int nota = Integer.parseInt(req.getParameter("nota"));
+            int nota;
+            try {
+                nota = Integer.parseInt(req.getParameter("nota"));
+            } catch (NumberFormatException e) {
+                resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+                return;
+            }
             String comentario = req.getParameter("comentario");
 
             if (nota < 1 || nota > 5) {
@@ -72,8 +74,15 @@ public class AvaliacaoServlet extends HttpServlet {
             avaliacao.setComentario(comentario);
             avaliacaoDao.insert(avaliacao);
         } else if ("editar".equals(acao)) {
-            int avaliacaoId = Integer.parseInt(req.getParameter("avaliacaoId"));
-            int nota = Integer.parseInt(req.getParameter("nota"));
+            int avaliacaoId;
+            int nota;
+            try {
+                avaliacaoId = Integer.parseInt(req.getParameter("avaliacaoId"));
+                nota = Integer.parseInt(req.getParameter("nota"));
+            } catch (NumberFormatException e) {
+                resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+                return;
+            }
             String comentario = req.getParameter("comentario");
 
             if (nota < 1 || nota > 5) {
@@ -88,7 +97,13 @@ public class AvaliacaoServlet extends HttpServlet {
             avaliacao.setComentario(comentario);
             avaliacaoDao.update(avaliacao);
         } else if ("excluir".equals(acao)) {
-            int avaliacaoId = Integer.parseInt(req.getParameter("avaliacaoId"));
+            int avaliacaoId;
+            try {
+                avaliacaoId = Integer.parseInt(req.getParameter("avaliacaoId"));
+            } catch (NumberFormatException e) {
+                resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+                return;
+            }
             avaliacaoDao.deleteById(avaliacaoId, usuario.getId());
         }
 

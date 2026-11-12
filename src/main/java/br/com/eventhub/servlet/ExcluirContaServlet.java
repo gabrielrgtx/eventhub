@@ -19,10 +19,6 @@ public class ExcluirContaServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
-        if (usuario == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
-            return;
-        }
 
         int eventos = new EventDao().countByCriador(usuario.getId());
         if (eventos > 0) {

@@ -2,14 +2,12 @@ package br.com.eventhub.servlet;
 
 import br.com.eventhub.dao.CategoriaDao;
 import br.com.eventhub.model.Categoria;
-import br.com.eventhub.model.User;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @WebServlet("/categorias")
@@ -17,19 +15,19 @@ public class CategoriaServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession(false);
-        User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
-        if (usuario == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
-            return;
-        }
-
         CategoriaDao categoriaDao = new CategoriaDao();
         req.setAttribute("categorias", categoriaDao.findAll());
 
         String editar = req.getParameter("editar");
         if (editar != null) {
-            req.setAttribute("categoriaEdicao", categoriaDao.findById(Integer.parseInt(editar)));
+            int idEdicao;
+            try {
+                idEdicao = Integer.parseInt(editar);
+            } catch (NumberFormatException e) {
+                resp.sendRedirect(req.getContextPath() + "/categorias");
+                return;
+            }
+            req.setAttribute("categoriaEdicao", categoriaDao.findById(idEdicao));
         }
 
         req.getRequestDispatcher("/categorias.jsp").forward(req, resp);
@@ -37,13 +35,6 @@ public class CategoriaServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        HttpSession session = req.getSession(false);
-        User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
-        if (usuario == null) {
-            resp.sendRedirect(req.getContextPath() + "/login");
-            return;
-        }
-
         String acao = req.getParameter("acao");
         String destino = req.getContextPath() + "/categorias";
         CategoriaDao categoriaDao = new CategoriaDao();
@@ -62,7 +53,13 @@ public class CategoriaServlet extends HttpServlet {
             categoria.setNome(nome);
             categoriaDao.insert(categoria);
         } else if ("editar".equals(acao)) {
-            int id = Integer.parseInt(req.getParameter("id"));
+            int id;
+            try {
+                id = Integer.parseInt(req.getParameter("id"));
+            } catch (NumberFormatException e) {
+                resp.sendRedirect(req.getContextPath() + "/categorias");
+                return;
+            }
             String nome = nomeLimpo(req.getParameter("nome"));
             if (nome.isEmpty()) {
                 resp.sendRedirect(destino + "?editar=" + id + "&erro=nome-vazio");
@@ -78,7 +75,13 @@ public class CategoriaServlet extends HttpServlet {
             categoria.setNome(nome);
             categoriaDao.update(categoria);
         } else if ("excluir".equals(acao)) {
-            int id = Integer.parseInt(req.getParameter("id"));
+            int id;
+            try {
+                id = Integer.parseInt(req.getParameter("id"));
+            } catch (NumberFormatException e) {
+                resp.sendRedirect(req.getContextPath() + "/categorias");
+                return;
+            }
             categoriaDao.deleteById(id);
         }
 
