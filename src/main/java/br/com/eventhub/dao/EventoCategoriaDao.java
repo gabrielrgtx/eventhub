@@ -60,4 +60,25 @@ public class EventoCategoriaDao {
             return Collections.emptyList();
         }
     }
+
+    public int countByCategoria(int categoriaId) {
+        String SQL = "SELECT COUNT(*) FROM EVENTO_CATEGORIA WHERE CATEGORIA_ID = ?";
+        try {
+            Connection connection = ConnectionFactory.getConnection();
+            System.out.println("success in database connection");
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL);
+            preparedStatement.setInt(1, categoriaId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            int total = 0;
+            if (resultSet.next()) {
+                total = resultSet.getInt(1);
+            }
+            System.out.println("success in count eventos by categoria");
+            connection.close();
+            return total;
+        } catch (Exception e) {
+            System.out.println("fail in database connection");
+            return -1;
+        }
+    }
 }

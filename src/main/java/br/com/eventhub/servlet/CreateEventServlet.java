@@ -32,6 +32,7 @@ public class CreateEventServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
+        String id = req.getParameter("id");
         List<Part> fotos = new ArrayList<>();
         try {
             for (Part parte : req.getParts()) {
@@ -43,7 +44,6 @@ public class CreateEventServlet extends HttpServlet {
             mostrarFormulario(req, resp, null, "Cada foto pode ter no máximo 5 MB, e o envio todo até 30 MB.");
             return;
         }
-        String id = req.getParameter("id");
         Event atual = null;
         if (id != null && !id.isEmpty()) {
             int eventoId;

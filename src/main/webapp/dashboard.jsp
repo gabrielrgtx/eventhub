@@ -46,12 +46,12 @@
             <c:if test="${erroBusca}"><p class="mensagem" role="alert">Não foi possível carregar os eventos. Atualize a página para tentar novamente.</p></c:if>
 
             <div class="pilulas">
-                <a class="pilula ${empty param.categoria and not somenteFavoritos ? 'ativa' : ''}" href="/listar-eventos">Todos</a>
+                <a class="pilula ${categoriaSelecionada == 0 and not somenteFavoritos ? 'ativa' : ''}" href="/listar-eventos">Todos</a>
                 <c:if test="${not empty usuarioLogado}">
                     <a class="pilula ${somenteFavoritos ? 'ativa' : ''}" href="/listar-eventos?favoritos=1">Favoritos</a>
                 </c:if>
                 <c:forEach var="c" items="${categorias}">
-                    <a class="pilula ${param.categoria == c.id ? 'ativa' : ''}" href="/listar-eventos?categoria=${c.id}"><c:out value="${c.nome}"/></a>
+                    <a class="pilula ${categoriaSelecionada == c.id ? 'ativa' : ''}" href="/listar-eventos?categoria=${c.id}"><c:out value="${c.nome}"/></a>
                 </c:forEach>
             </div>
 

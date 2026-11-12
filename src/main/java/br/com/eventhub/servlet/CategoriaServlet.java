@@ -1,6 +1,7 @@
 package br.com.eventhub.servlet;
 
 import br.com.eventhub.dao.CategoriaDao;
+import br.com.eventhub.dao.EventoCategoriaDao;
 import br.com.eventhub.model.Categoria;
 
 import javax.servlet.ServletException;
@@ -80,6 +81,10 @@ public class CategoriaServlet extends HttpServlet {
                 id = Integer.parseInt(req.getParameter("id"));
             } catch (NumberFormatException e) {
                 resp.sendRedirect(req.getContextPath() + "/categorias");
+                return;
+            }
+            if (new EventoCategoriaDao().countByCategoria(id) != 0) {
+                resp.sendRedirect(destino + "?erro=em-uso");
                 return;
             }
             categoriaDao.deleteById(id);

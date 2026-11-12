@@ -94,6 +94,7 @@ public class ListEventServlet extends HttpServlet {
         req.setAttribute("somenteFavoritos", somenteFavoritos);
         req.setAttribute("voltar", "/listar-eventos" + (consulta == null ? "" : "?" + consulta));
         req.setAttribute("categorias", new CategoriaDao().findAll());
+        req.setAttribute("categoriaSelecionada", categoriaId);
         req.getRequestDispatcher("dashboard.jsp").forward(req, resp);
     }
 }

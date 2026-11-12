@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Time;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -261,8 +262,6 @@ public class EventDao {
     public List<Event> search(String nome, int categoriaId, String cidade, String data, int usuarioId) {
         erroBusca = false;
         String SQL = "SELECT * FROM EVENTO WHERE (PUBLICO = TRUE OR CRIADOR_ID = ?)"
-                + " AND (? = '' OR UPPER(NOME) LIKE UPPER(?))"
-                + " AND (? = '' OR UPPER(CIDADE) LIKE UPPER(?))"
                 + " AND (? = '' OR CAST(DATA_EVENTO AS VARCHAR) = ?)"
                 + " AND (? = 0 OR ID IN (SELECT EVENTO_ID FROM EVENTO_CATEGORIA WHERE CATEGORIA_ID = ?))"
                 + " ORDER BY DATA_EVENTO";
@@ -272,17 +271,20 @@ public class EventDao {
             System.out.println("success in database connection");
             PreparedStatement preparedStatement = connection.prepareStatement(SQL);
             preparedStatement.setInt(1, usuarioId);
-            preparedStatement.setString(2, nome);
-            preparedStatement.setString(3, "%" + nome + "%");
-            preparedStatement.setString(4, cidade);
-            preparedStatement.setString(5, "%" + cidade + "%");
-            preparedStatement.setString(6, data);
-            preparedStatement.setString(7, data);
-            preparedStatement.setInt(8, categoriaId);
-            preparedStatement.setInt(9, categoriaId);
+            preparedStatement.setString(2, data);
+            preparedStatement.setString(3, data);
+            preparedStatement.setInt(4, categoriaId);
+            preparedStatement.setInt(5, categoriaId);
             ResultSet resultSet = preparedStatement.executeQuery();
+            String nomeBuscado = normalizar(nome);
+            String cidadeBuscada = normalizar(cidade);
             while (resultSet.next()) {
-                eventos.add(montarEvento(resultSet));
+                Event evento = montarEvento(resultSet);
+                boolean nomeCombina = normalizar(evento.getNome()).contains(nomeBuscado);
+                boolean cidadeCombina = normalizar(evento.getEndereco().getCidade()).contains(cidadeBuscada);
+                if (nomeCombina && cidadeCombina) {
+                    eventos.add(evento);
+                }
             }
             System.out.println("success in search events");
             connection.close();
@@ -313,6 +315,14 @@ public class EventDao {
             System.out.println("fail in database connection");
             return Collections.emptyList();
         }
+    }
+
+    private String normalizar(String texto) {
+        if (texto == null) {
+            return "";
+        }
+        String semAcento = Normalizer.normalize(texto, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        return semAcento.toLowerCase().trim().replaceAll("\\s+", " ");
     }
 
     private Event montarEvento(ResultSet resultSet) throws SQLException {
