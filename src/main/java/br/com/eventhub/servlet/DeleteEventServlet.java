@@ -32,6 +32,6 @@ public class DeleteEventServlet extends HttpServlet {
             return;
         }
         new EventDao().deleteEventById(eventId);
-        resp.sendRedirect("/listar-eventos");
+        resp.sendRedirect(req.getContextPath() + "/listar-eventos");
     }
 }

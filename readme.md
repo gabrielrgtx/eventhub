@@ -48,6 +48,39 @@ Após a realização de um evento, os usuários que estavam inscritos podem regi
 - Eventos que já fui
 - Eventos que criei
 
+## Como rodar
+
+### Requisitos
+- Java 8
+- Maven
+
+### Passos
+1. Clonar o repositório
+2. Entrar na pasta `eventhub`
+3. Rodar `mvn clean compile`
+4. Rodar `mvn tomcat7:run`
+5. Abrir http://localhost:8080/ no navegador
+
+### Banco de dados
+- H2 em arquivo na pasta do usuário: `jdbc:h2:~/test`, usuário `sa`, senha `sa`
+- O schema e os dados de exemplo são criados automaticamente na primeira execução
+- Console do banco em http://localhost:8080/console
+- Para recomeçar do zero, parar o servidor e apagar o arquivo `test.mv.db` da pasta do usuário
+
+### Usuários de teste
+Todos com a senha `eventhub123`:
+- lucas@email.com
+- gabriel@gabriel.com
+- bob@email.com
+- ana@email.com
+
+### Fotos
+- As fotos enviadas pelos usuários ficam na pasta `eventhub-uploads`, dentro da pasta do usuário
+
+### Áreas
+- Pública: listar eventos, ver evento, ver perfil, login e cadastro
+- Logada: painel, criar, editar, cancelar e excluir evento, inscrição, favoritos, avaliação, categorias e editar perfil, protegida pelo `AuthenticationFilter`
+
 ## Protótipos
 
 ### Login

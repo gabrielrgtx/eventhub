@@ -4,6 +4,7 @@ import br.com.eventhub.dao.CategoriaDao;
 import br.com.eventhub.dao.EventDao;
 import br.com.eventhub.dao.EventoCategoriaDao;
 import br.com.eventhub.dao.ImagemEventoDao;
+import br.com.eventhub.dao.InscricaoDao;
 import br.com.eventhub.model.Endereco;
 import br.com.eventhub.model.Event;
 import br.com.eventhub.model.User;
@@ -85,7 +86,7 @@ public class CreateEventServlet extends HttpServlet {
             mostrarFormulario(req, resp, atual, "Escolha uma data e um horário futuros para o evento.");
             return;
         }
-        if (atual != null && evento.getVagas() < new br.com.eventhub.dao.InscricaoDao().countByEvento(atual.getId())) {
+        if (atual != null && evento.getVagas() < new InscricaoDao().countByEvento(atual.getId())) {
             mostrarFormulario(req, resp, atual, "O número de vagas não pode ser menor que o de pessoas inscritas.");
             return;
         }
