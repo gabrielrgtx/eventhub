@@ -27,6 +27,7 @@ public class PerfilServlet extends HttpServlet {
         HttpSession session = req.getSession(false);
         User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
 
+        boolean somenteFoto = "foto".equals(req.getParameter("acao"));
         Part arquivo;
         try {
             arquivo = req.getPart("foto-arquivo");
@@ -35,7 +36,6 @@ public class PerfilServlet extends HttpServlet {
             return;
         }
 
-        boolean somenteFoto = "foto".equals(req.getParameter("acao"));
         User atualizado = new User();
         atualizado.setId(usuario.getId());
         atualizado.setFoto(usuario.getFoto());

@@ -206,9 +206,13 @@
         </div>
         <p class="vazio">Um pouco do que andam falando por aí</p>
         <c:if test="${inscrito and evento.presencaLiberada and not presencaConfirmada}"><p class="vazio">Sua avaliação fica disponível após o organizador confirmar sua presença.</p></c:if>
-        <c:if test="${not empty param.erro}">
-            <p class="mensagem">Não foi possível avaliar: <c:out value="${param.erro}"/></p>
-        </c:if>
+        <c:choose>
+            <c:when test="${param.erro == 'ja-avaliou'}"><p class="ev-mensagem ev-mensagem-aviso" role="alert">${iconeAviso}Você já avaliou este evento. Para mudar, edite a sua avaliação abaixo.</p></c:when>
+            <c:when test="${param.erro == 'presenca-nao-confirmada'}"><p class="ev-mensagem ev-mensagem-aviso" role="alert">${iconeAviso}Só quem teve a presença confirmada pelo organizador pode avaliar.</p></c:when>
+            <c:when test="${param.erro == 'evento-nao-realizado'}"><p class="ev-mensagem ev-mensagem-aviso" role="alert">${iconeAviso}Este evento ainda não aconteceu. A avaliação abre depois da data do evento.</p></c:when>
+            <c:when test="${param.erro == 'nota-invalida'}"><p class="ev-mensagem ev-mensagem-aviso" role="alert">${iconeAviso}Escolha uma nota de 1 a 5 estrelas.</p></c:when>
+            <c:when test="${not empty param.erro}"><p class="ev-mensagem ev-mensagem-aviso" role="alert">${iconeAviso}Não foi possível registrar a avaliação. Tente novamente.</p></c:when>
+        </c:choose>
 
         <c:if test="${podeAvaliar}">
             <form class="comentario" action="/avaliacao" method="post">

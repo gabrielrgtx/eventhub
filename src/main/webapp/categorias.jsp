@@ -20,6 +20,9 @@
         <c:if test="${param.erro == 'nome-duplicado'}">
             <p class="mensagem">Já existe uma categoria com esse nome.</p>
         </c:if>
+        <c:if test="${param.erro == 'em-uso'}">
+            <p class="mensagem" role="alert">Esta categoria está em uso por um ou mais eventos e não pode ser excluída.</p>
+        </c:if>
 
         <div class="caixa">
             <c:choose>

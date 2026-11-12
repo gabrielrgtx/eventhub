@@ -39,14 +39,14 @@ INSERT INTO EVENTO_CATEGORIA (EVENTO_ID, CATEGORIA_ID) VALUES
 
 INSERT INTO IMAGEM_EVENTO (EVENTO_ID, CAMINHO) VALUES
 (1, '/img/eventos/sp-open-tenis.jpg'),
-(2, 'https://picsum.photos/seed/food-trucks/600/800'),
+(2, '/img/eventos/food-trucks-1.jpg'),
 (3, '/img/eventos/bloquinho-1.jpg'),
 (3, '/img/eventos/bloquinho-2.png'),
 (3, '/img/eventos/bloquinho-3.png'),
 (4, '/img/eventos/bienal-1.jpg'),
 (4, '/img/eventos/bienal-2.png'),
 (4, '/img/eventos/bienal-3.png'),
-(5, 'https://picsum.photos/seed/brasil-tarsila/600/800'),
+(5, '/img/eventos/tarsila-1.png'),
 (6, '/img/eventos/reveillon-1.png'),
 (7, '/img/eventos/sesc-paulista.jpg'),
 (7, '/img/eventos/sesc-paulista-vista.jpg'),
