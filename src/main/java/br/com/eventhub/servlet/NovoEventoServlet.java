@@ -1,6 +1,7 @@
 package br.com.eventhub.servlet;
 
 import br.com.eventhub.dao.CategoriaDao;
+import br.com.eventhub.dao.EventoAcessibilidadeDao;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -17,6 +18,8 @@ public class NovoEventoServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setAttribute("categorias", new CategoriaDao().findAll());
         req.setAttribute("categoriasEvento", new ArrayList<Integer>());
+        req.setAttribute("recursosAcessibilidade", EventoAcessibilidadeDao.RECURSOS);
+        req.setAttribute("acessibilidadeEvento", new ArrayList<String>());
         req.getRequestDispatcher("/formulario-evento.jsp").forward(req, resp);
     }
 }

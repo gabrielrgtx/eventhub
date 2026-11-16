@@ -2,6 +2,7 @@ package br.com.eventhub.servlet;
 
 import br.com.eventhub.dao.CategoriaDao;
 import br.com.eventhub.dao.EventDao;
+import br.com.eventhub.dao.EventoAcessibilidadeDao;
 import br.com.eventhub.dao.EventoCategoriaDao;
 import br.com.eventhub.dao.ImagemEventoDao;
 import br.com.eventhub.model.Event;
@@ -37,7 +38,9 @@ public class EditEventServlet extends HttpServlet {
         req.setAttribute("evento", evento);
         req.setAttribute("categorias", new CategoriaDao().findAll());
         req.setAttribute("categoriasEvento", new EventoCategoriaDao().findCategoriaIdsByEvento(id));
-        req.setAttribute("imagensEvento", new ImagemEventoDao().findByEvento(id));
+        req.setAttribute("recursosAcessibilidade", EventoAcessibilidadeDao.RECURSOS);
+        req.setAttribute("acessibilidadeEvento", new EventoAcessibilidadeDao().findRecursosByEvento(id));
+        req.setAttribute("imagensEvento",new ImagemEventoDao().findByEvento(id));
         req.getRequestDispatcher("/formulario-evento.jsp").forward(req, resp);
     }
 }

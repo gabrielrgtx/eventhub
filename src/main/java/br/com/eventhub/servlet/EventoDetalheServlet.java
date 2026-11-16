@@ -3,6 +3,7 @@ package br.com.eventhub.servlet;
 import br.com.eventhub.dao.AvaliacaoDao;
 import br.com.eventhub.dao.CategoriaDao;
 import br.com.eventhub.dao.EventDao;
+import br.com.eventhub.dao.EventoAcessibilidadeDao;
 import br.com.eventhub.dao.EventoCategoriaDao;
 import br.com.eventhub.dao.FavoritoDao;
 import br.com.eventhub.dao.ImagemEventoDao;
@@ -22,7 +23,9 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @WebServlet("/evento")
 public class EventoDetalheServlet extends HttpServlet {
@@ -64,6 +67,14 @@ public class EventoDetalheServlet extends HttpServlet {
                 evento.getCategorias().add(categoria);
             }
         }
+        List<String> recursosEvento = new EventoAcessibilidadeDao().findRecursosByEvento(id);
+        Map<String, String> acessibilidade = new LinkedHashMap<>();
+        for (String recurso : EventoAcessibilidadeDao.RECURSOS.keySet()) {
+            if (recursosEvento.contains(recurso)) {
+                acessibilidade.put(recurso, EventoAcessibilidadeDao.RECURSOS.get(recurso));
+            }
+        }
+        req.setAttribute("acessibilidade", acessibilidade);
         evento.setImagens(new ImagemEventoDao().findByEvento(id));
         User criador = new UserDao().findById(evento.getCriador().getId());
         if (criador != null) {

@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>EventHub</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css?v=4">
 </head>
 <body>
     <%@ include file="cabecalho.jsp" %>
@@ -56,8 +56,8 @@
             </div>
 
             <c:if test="${not somenteFavoritos}">
-                <details class="busca-recolhida" ${not empty param.cidade or not empty param.data ? 'open' : ''}>
-                    <summary>Filtrar por cidade ou data</summary>
+                <details class="busca-recolhida" ${not empty param.cidade or not empty param.data or not empty acessibilidadeSelecionada ? 'open' : ''}>
+                    <summary>Filtrar por cidade, data ou acessibilidade</summary>
                     <form class="busca" action="/listar-eventos" method="get">
                         <input type="hidden" name="nome" value="<c:out value="${param.nome}"/>">
                         <input type="hidden" name="categoria" value="<c:out value="${param.categoria}"/>">
@@ -72,6 +72,17 @@
                         <div class="busca-botoes">
                             <button class="botao" type="submit">Filtrar</button>
                             <a href="/listar-eventos">Limpar</a>
+                        </div>
+                        <div class="pilulas" style="grid-column: 1 / -1; justify-content: flex-start; margin: 0;">
+                            <c:forEach var="r" items="${recursosAcessibilidade}">
+                                <c:set var="marcado" value="false"/>
+                                <c:forEach var="recursoSelecionado" items="${acessibilidadeSelecionada}">
+                                    <c:if test="${recursoSelecionado == r.key}">
+                                        <c:set var="marcado" value="true"/>
+                                    </c:if>
+                                </c:forEach>
+                                <label class="chip"><input type="checkbox" name="acessibilidade" value="${r.key}" ${marcado ? 'checked' : ''}> <%@ include file="icone-acessibilidade.jsp" %><c:out value="${r.value}"/></label>
+                            </c:forEach>
                         </div>
                     </form>
                 </details>

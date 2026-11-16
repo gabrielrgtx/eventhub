@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${empty evento ? 'Novo Evento' : 'Editar Evento'}</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/style.css?v=4">
 </head>
 <body>
     <%@ include file="cabecalho.jsp" %>
@@ -79,7 +79,22 @@
                                 <c:set var="marcado" value="true"/>
                             </c:if>
                         </c:forEach>
-                        <label class="pilula"><input type="checkbox" name="categorias" value="${c.id}" ${marcado ? 'checked' : ''}> <c:out value="${c.nome}"/></label>
+                        <label class="chip"><input type="checkbox" name="categorias" value="${c.id}" ${marcado ? 'checked' : ''}> <c:out value="${c.nome}"/></label>
+                    </c:forEach>
+                </div>
+            </div>
+
+            <div class="inteiro">
+                <label>Acessibilidade (Opcional)</label>
+                <div class="pilulas" style="justify-content: flex-start;">
+                    <c:forEach var="r" items="${recursosAcessibilidade}">
+                        <c:set var="marcado" value="false"/>
+                        <c:forEach var="recursoEvento" items="${acessibilidadeEvento}">
+                            <c:if test="${recursoEvento == r.key}">
+                                <c:set var="marcado" value="true"/>
+                            </c:if>
+                        </c:forEach>
+                        <label class="chip"><input type="checkbox" name="acessibilidade" value="${r.key}" ${marcado ? 'checked' : ''}> <%@ include file="icone-acessibilidade.jsp" %><c:out value="${r.value}"/></label>
                     </c:forEach>
                 </div>
             </div>
