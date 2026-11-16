@@ -40,6 +40,16 @@ public class EventoDetalheServlet extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/listar-eventos");
             return;
         }
+        InscricaoDao inscricaoDao = new InscricaoDao();
+        HttpSession session = req.getSession(false);
+        User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
+        if (!evento.isPublico()) {
+            boolean ehCriador = usuario != null && usuario.getId() == evento.getCriador().getId();
+            if (!ehCriador && (usuario == null || !inscricaoDao.existsInscricao(usuario.getId(), id))) {
+                resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+                return;
+            }
+        }
         evento.setInscricoesEncerradas(!LocalDateTime.of(evento.getData(), evento.getInicio()).isAfter(LocalDateTime.now()));
         evento.setPresencaLiberada(evento.getData().isBefore(LocalDate.now()));
         List<Integer> categoriaIds = new EventoCategoriaDao().findCategoriaIdsByEvento(id);
@@ -53,10 +63,7 @@ public class EventoDetalheServlet extends HttpServlet {
         if (criador != null) {
             evento.setCriador(criador);
         }
-        InscricaoDao inscricaoDao = new InscricaoDao();
         int vagasRestantes = evento.getVagas() - inscricaoDao.countByEvento(id);
-        HttpSession session = req.getSession(false);
-        User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
         boolean inscrito = false;
         boolean presencaConfirmada = false;
         boolean podeAvaliar = false;

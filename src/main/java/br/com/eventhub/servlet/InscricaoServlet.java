@@ -1,6 +1,8 @@
 package br.com.eventhub.servlet;
 
+import br.com.eventhub.dao.EventDao;
 import br.com.eventhub.dao.InscricaoDao;
+import br.com.eventhub.model.Event;
 import br.com.eventhub.model.User;
 
 import javax.servlet.ServletException;
@@ -42,6 +44,11 @@ public class InscricaoServlet extends HttpServlet {
         }
         int resultado;
         if ("inscrever".equals(acao)) {
+            Event evento = new EventDao().findEventById(eventoId);
+            if (evento != null && !evento.isPublico() && evento.getCriador().getId() != usuarioId) {
+                resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+                return;
+            }
             resultado = inscricaoDao.inscrever(usuarioId, eventoId);
         } else if ("cancelar".equals(acao)) {
             resultado = inscricaoDao.cancelar(usuarioId, eventoId);
