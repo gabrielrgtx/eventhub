@@ -2,6 +2,7 @@ package br.com.eventhub.servlet;
 
 import br.com.eventhub.dao.CategoriaDao;
 import br.com.eventhub.dao.EventDao;
+import br.com.eventhub.dao.EventoAcessibilidadeDao;
 import br.com.eventhub.dao.FavoritoDao;
 import br.com.eventhub.dao.ImagemEventoDao;
 import br.com.eventhub.dao.InscricaoDao;
@@ -60,6 +61,13 @@ public class ListEventServlet extends HttpServlet {
         EventDao eventDao = new EventDao();
         List<Event> eventos = eventDao.search(nome.trim(), categoriaId, cidade.trim(), data.trim(), usuarioId);
         req.setAttribute("erroBusca", eventDao.isErroBusca());
+        List<String> acessibilidade = EventoAcessibilidadeDao.validos(req.getParameterValues("acessibilidade"));
+        if (!acessibilidade.isEmpty()) {
+            List<Integer> eventoIds = new EventoAcessibilidadeDao().findEventoIdsComTodos(acessibilidade);
+            eventos.removeIf(evento -> !eventoIds.contains(evento.getId()));
+        }
+        req.setAttribute("recursosAcessibilidade", EventoAcessibilidadeDao.RECURSOS);
+        req.setAttribute("acessibilidadeSelecionada", acessibilidade);
         InscricaoDao inscricaoDao = new InscricaoDao();
         ImagemEventoDao imagemEventoDao = new ImagemEventoDao();
         FavoritoDao favoritoDao = new FavoritoDao();

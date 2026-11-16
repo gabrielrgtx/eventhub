@@ -8,7 +8,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><c:out value="${evento.nome}"/></title>
-    <link rel="stylesheet" href="/css/style.css?v=2">
+    <link rel="stylesheet" href="/css/style.css?v=4">
 </head>
 <body>
     <%@ include file="cabecalho.jsp" %>
@@ -98,6 +98,17 @@
                             <span class="ev-dado-texto"><strong><c:out value="${evento.endereco.cidade}"/>, <c:out value="${evento.endereco.estado}"/></strong><small><c:out value="${evento.endereco.rua}"/>, <c:out value="${evento.endereco.numero}"/> - <c:out value="${evento.endereco.bairro}"/></small></span>
                         </li>
                     </ul>
+
+                    <c:if test="${not empty acessibilidade}">
+                        <div class="ev-acessibilidade">
+                            <strong class="ev-acessibilidade-titulo">Acessibilidade</strong>
+                            <div class="ev-categorias">
+                                <c:forEach var="r" items="${acessibilidade}">
+                                    <span class="acess-etiqueta"><%@ include file="icone-acessibilidade.jsp" %><c:out value="${r.value}"/></span>
+                                </c:forEach>
+                            </div>
+                        </div>
+                    </c:if>
 
                     <c:if test="${not evento.inscricoesEncerradas and not evento.cancelado}">
                         <c:choose>

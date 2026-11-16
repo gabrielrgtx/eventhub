@@ -2,6 +2,7 @@ package br.com.eventhub.servlet;
 
 import br.com.eventhub.dao.CategoriaDao;
 import br.com.eventhub.dao.EventDao;
+import br.com.eventhub.dao.EventoAcessibilidadeDao;
 import br.com.eventhub.dao.EventoCategoriaDao;
 import br.com.eventhub.dao.ImagemEventoDao;
 import br.com.eventhub.dao.InscricaoDao;
@@ -135,6 +136,7 @@ public class CreateEventServlet extends HttpServlet {
                 }
             }
         }
+        new EventoAcessibilidadeDao().salvar(eventoId, EventoAcessibilidadeDao.validos(req.getParameterValues("acessibilidade")));
         ImagemEventoDao imagemEventoDao = new ImagemEventoDao();
         imagemEventoDao.deleteByEvento(eventoId);
         if (imagens != null) {
@@ -172,6 +174,8 @@ public class CreateEventServlet extends HttpServlet {
             }
         }
         req.setAttribute("categoriasEvento", categoriasEvento);
+        req.setAttribute("recursosAcessibilidade", EventoAcessibilidadeDao.RECURSOS);
+        req.setAttribute("acessibilidadeEvento", EventoAcessibilidadeDao.validos(req.getParameterValues("acessibilidade")));
         req.getRequestDispatcher("/formulario-evento.jsp").forward(req, resp);
     }
 }
