@@ -23,7 +23,11 @@
         <c:if test="${param.erro == 'em-uso'}">
             <p class="mensagem" role="alert">Esta categoria está em uso por um ou mais eventos e não pode ser excluída.</p>
         </c:if>
+        <c:if test="${param.erro == 'sem-permissao'}">
+            <p class="mensagem" role="alert">Apenas o administrador pode alterar categorias.</p>
+        </c:if>
 
+        <c:if test="${podeEditar}">
         <div class="caixa">
             <c:choose>
                 <c:when test="${empty categoriaEdicao}">
@@ -52,6 +56,7 @@
                 </c:otherwise>
             </c:choose>
         </div>
+        </c:if>
 
         <h2 class="subtitulo">Lista de categorias</h2>
         <c:choose>
@@ -68,12 +73,14 @@
                         <tr>
                             <td><c:out value="${categoria.nome}"/></td>
                             <td>
+                                <c:if test="${podeEditar}">
                                 <a class="botao pequeno claro" href="/categorias?editar=${categoria.id}">Editar</a>
                                 <form action="/categorias" method="post" onsubmit="return confirm('Excluir esta categoria?');">
                                     <input type="hidden" name="acao" value="excluir">
                                     <input type="hidden" name="id" value="${categoria.id}">
                                     <button class="botao pequeno perigo" type="submit">Excluir</button>
                                 </form>
+                                </c:if>
                             </td>
                         </tr>
                     </c:forEach>

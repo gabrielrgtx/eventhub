@@ -3,24 +3,30 @@ package br.com.eventhub.servlet;
 import br.com.eventhub.dao.CategoriaDao;
 import br.com.eventhub.dao.EventoCategoriaDao;
 import br.com.eventhub.model.Categoria;
+import br.com.eventhub.model.User;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
 @WebServlet("/categorias")
 public class CategoriaServlet extends HttpServlet {
 
+    private static final String ADMIN = "gabriel";
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         CategoriaDao categoriaDao = new CategoriaDao();
         req.setAttribute("categorias", categoriaDao.findAll());
+        boolean admin = ehAdmin(req);
+        req.setAttribute("podeEditar", admin);
 
         String editar = req.getParameter("editar");
-        if (editar != null) {
+        if (admin && editar != null) {
             int idEdicao;
             try {
                 idEdicao = Integer.parseInt(editar);
@@ -38,6 +44,10 @@ public class CategoriaServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String acao = req.getParameter("acao");
         String destino = req.getContextPath() + "/categorias";
+        if (!ehAdmin(req)) {
+            resp.sendRedirect(destino + "?erro=sem-permissao");
+            return;
+        }
         CategoriaDao categoriaDao = new CategoriaDao();
 
         if ("criar".equals(acao)) {
@@ -95,5 +105,14 @@ public class CategoriaServlet extends HttpServlet {
 
     private String nomeLimpo(String nome) {
         return nome == null ? "" : nome.trim();
+    }
+
+    private boolean ehAdmin(HttpServletRequest req) {
+        HttpSession session = req.getSession(false);
+        if (session == null) {
+            return false;
+        }
+        User usuario = (User) session.getAttribute("usuarioLogado");
+        return usuario != null && ADMIN.equals(usuario.getUsuario());
     }
 }
