@@ -11,6 +11,7 @@ import br.com.eventhub.dao.UserDao;
 import br.com.eventhub.model.Categoria;
 import br.com.eventhub.model.Event;
 import br.com.eventhub.model.User;
+import br.com.eventhub.util.ConviteUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -43,13 +44,18 @@ public class EventoDetalheServlet extends HttpServlet {
         InscricaoDao inscricaoDao = new InscricaoDao();
         HttpSession session = req.getSession(false);
         User usuario = session == null ? null : (User) session.getAttribute("usuarioLogado");
+        boolean ehCriador = usuario != null && usuario.getId() == evento.getCriador().getId();
+        boolean conviteValido = !evento.isPublico() && ConviteUtil.valido(id, req.getParameter("convite"));
         if (!evento.isPublico()) {
-            boolean ehCriador = usuario != null && usuario.getId() == evento.getCriador().getId();
-            if (!ehCriador && (usuario == null || !inscricaoDao.existsInscricao(usuario.getId(), id))) {
+            if (!ehCriador && !conviteValido && (usuario == null || !inscricaoDao.existsInscricao(usuario.getId(), id))) {
                 resp.sendRedirect(req.getContextPath() + "/listar-eventos");
                 return;
             }
         }
+        if (ehCriador) {
+            req.setAttribute("linkConvite", "/evento?id=" + id + "&convite=" + ConviteUtil.gerar(id));
+        }
+        req.setAttribute("conviteValido", conviteValido);
         evento.setInscricoesEncerradas(!LocalDateTime.of(evento.getData(), evento.getInicio()).isAfter(LocalDateTime.now()));
         evento.setPresencaLiberada(evento.getData().isBefore(LocalDate.now()));
         List<Integer> categoriaIds = new EventoCategoriaDao().findCategoriaIdsByEvento(id);

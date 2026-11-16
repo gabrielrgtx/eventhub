@@ -119,7 +119,10 @@
                             <c:when test="${evento.inscricoesEncerradas}"><span class="ev-status">Inscrições encerradas</span></c:when>
                             <c:when test="${not empty usuarioLogado and usuarioLogado.id == evento.criador.id}"><span class="ev-status"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5L20 7"/></svg>Você criou este evento</span></c:when>
                             <c:when test="${empty usuarioLogado}">
-                                <a class="ev-botao" href="/login">Entre para se inscrever</a>
+                                <c:choose>
+                                    <c:when test="${conviteValido}"><a class="ev-botao" href="/login?evento=${evento.id}&amp;convite=<c:out value="${param.convite}"/>">Entre para se inscrever</a></c:when>
+                                    <c:otherwise><a class="ev-botao" href="/login">Entre para se inscrever</a></c:otherwise>
+                                </c:choose>
                             </c:when>
                             <c:when test="${inscrito}">
                                 <form action="/inscricao" method="post">
@@ -132,6 +135,7 @@
                                 <form class="ev-form-principal" action="/inscricao" method="post">
                                     <input type="hidden" name="eventoId" value="${evento.id}">
                                     <input type="hidden" name="acao" value="inscrever">
+                                    <c:if test="${conviteValido}"><input type="hidden" name="convite" value="<c:out value="${param.convite}"/>"></c:if>
                                     <button class="ev-botao" type="submit">Inscreva-se</button>
                                 </form>
                             </c:when>
@@ -174,6 +178,12 @@
                                 <button class="ev-botao-gerenciar ev-botao-excluir" type="submit"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>Excluir</button>
                             </form>
                         </div>
+                        <c:if test="${not empty linkConvite and not evento.publico}">
+                            <div class="campo">
+                                <label>Link de convite: só quem tiver este link entra neste evento privado</label>
+                                <input type="text" readonly onclick="this.select()" value="<c:out value="${pageContext.request.scheme}://${pageContext.request.serverName}:${pageContext.request.serverPort}${pageContext.request.contextPath}${linkConvite}"/>">
+                            </div>
+                        </c:if>
                     </div>
                 </c:if>
             </div>
