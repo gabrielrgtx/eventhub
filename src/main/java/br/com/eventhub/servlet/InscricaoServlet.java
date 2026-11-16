@@ -1,7 +1,10 @@
 package br.com.eventhub.servlet;
 
+import br.com.eventhub.dao.EventDao;
 import br.com.eventhub.dao.InscricaoDao;
+import br.com.eventhub.model.Event;
 import br.com.eventhub.model.User;
+import br.com.eventhub.util.ConviteUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -41,7 +44,16 @@ public class InscricaoServlet extends HttpServlet {
             return;
         }
         int resultado;
+        boolean conviteValido = false;
         if ("inscrever".equals(acao)) {
+            Event evento = new EventDao().findEventById(eventoId);
+            if (evento != null && !evento.isPublico()) {
+                conviteValido = ConviteUtil.valido(eventoId, req.getParameter("convite"));
+                if (evento.getCriador().getId() != usuarioId && !conviteValido) {
+                    resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+                    return;
+                }
+            }
             resultado = inscricaoDao.inscrever(usuarioId, eventoId);
         } else if ("cancelar".equals(acao)) {
             resultado = inscricaoDao.cancelar(usuarioId, eventoId);
@@ -63,6 +75,10 @@ public class InscricaoServlet extends HttpServlet {
         } else if (resultado == InscricaoDao.PROPRIO_EVENTO) {
             retorno = "evento-proprio";
         }
-        resp.sendRedirect(req.getContextPath() + "/evento?id=" + eventoId + "&retorno=" + retorno);
+        String destino = req.getContextPath() + "/evento?id=" + eventoId + "&retorno=" + retorno;
+        if (conviteValido && resultado != InscricaoDao.SUCESSO) {
+            destino = destino + "&convite=" + ConviteUtil.gerar(eventoId);
+        }
+        resp.sendRedirect(destino);
     }
 }

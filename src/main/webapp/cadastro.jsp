@@ -20,6 +20,10 @@
             </c:if>
 
             <form action="/cadastro" method="post">
+                <c:if test="${not empty param.evento and not empty param.convite}">
+                    <input type="hidden" name="evento" value="<c:out value="${param.evento}"/>">
+                    <input type="hidden" name="convite" value="<c:out value="${param.convite}"/>">
+                </c:if>
                 <div class="campo">
                     <label class="acessivel" for="cadastro-nome">Nome</label>
                     <input type="text" name="nome" id="cadastro-nome" placeholder="Nome" autocomplete="name" value="<c:out value="${param.nome}"/>">
@@ -37,7 +41,7 @@
                     <div class="senha-campo"><input type="password" name="senha" placeholder="Senha" id="senha-cadastro" autocomplete="new-password"><button type="button" class="olho" aria-label="Mostrar senha" onclick="mostrarSenha('senha-cadastro')"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/><path d="M3 3 21 21"/></svg></button></div>
                 </div>
                 <div class="login-botoes">
-                    <a class="botao" href="/login">Entrar</a>
+                    <a class="botao" href="/login<c:if test="${not empty param.evento and not empty param.convite}">?evento=<c:out value="${param.evento}"/>&amp;convite=<c:out value="${param.convite}"/></c:if>">Entrar</a>
                     <button class="botao" type="submit">Criar conta</button>
                 </div>
             </form>

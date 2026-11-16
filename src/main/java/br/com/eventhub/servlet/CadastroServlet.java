@@ -2,6 +2,7 @@ package br.com.eventhub.servlet;
 
 import br.com.eventhub.dao.UserDao;
 import br.com.eventhub.model.User;
+import br.com.eventhub.util.ConviteUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -48,10 +49,23 @@ public class CadastroServlet extends HttpServlet {
 
         int resultado = new UserDao().insert(usuario);
         if (resultado == 1) {
-            resp.sendRedirect(req.getContextPath() + "/login?cadastro=sucesso");
+            resp.sendRedirect(req.getContextPath() + "/login?cadastro=sucesso" + convite(req));
             return;
         }
         req.setAttribute("erro", resultado == 2 ? "Usuário ou e-mail já cadastrado." : "Não foi possível criar a conta. Tente novamente.");
         req.getRequestDispatcher("cadastro.jsp").forward(req, resp);
+    }
+
+    private String convite(HttpServletRequest req) {
+        int eventoId;
+        try {
+            eventoId = Integer.parseInt(req.getParameter("evento"));
+        } catch (NumberFormatException e) {
+            return "";
+        }
+        if (!ConviteUtil.valido(eventoId, req.getParameter("convite"))) {
+            return "";
+        }
+        return "&evento=" + eventoId + "&convite=" + ConviteUtil.gerar(eventoId);
     }
 }
