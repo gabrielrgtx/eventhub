@@ -2,6 +2,7 @@ package br.com.eventhub.servlet;
 
 import br.com.eventhub.dao.UserDao;
 import br.com.eventhub.model.User;
+import br.com.eventhub.util.ConviteUtil;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -18,7 +19,7 @@ public class LoginServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         if (session != null && session.getAttribute("usuarioLogado") != null) {
-            resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+            resp.sendRedirect(req.getContextPath() + destino(req));
             return;
         }
         req.getRequestDispatcher("login.jsp").forward(req, resp);
@@ -45,6 +46,19 @@ public class LoginServlet extends HttpServlet {
 
         HttpSession session = req.getSession();
         session.setAttribute("usuarioLogado", usuario);
-        resp.sendRedirect(req.getContextPath() + "/listar-eventos");
+        resp.sendRedirect(req.getContextPath() + destino(req));
+    }
+
+    private String destino(HttpServletRequest req) {
+        int eventoId;
+        try {
+            eventoId = Integer.parseInt(req.getParameter("evento"));
+        } catch (NumberFormatException e) {
+            return "/listar-eventos";
+        }
+        if (!ConviteUtil.valido(eventoId, req.getParameter("convite"))) {
+            return "/listar-eventos";
+        }
+        return "/evento?id=" + eventoId + "&convite=" + ConviteUtil.gerar(eventoId);
     }
 }

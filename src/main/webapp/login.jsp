@@ -21,6 +21,10 @@
             <c:if test="${param.cadastro == 'sucesso'}"><p class="mensagem" role="status">Conta criada! Entre com seu usuário ou e-mail.</p></c:if>
 
             <form action="/login" method="post">
+                <c:if test="${not empty param.evento and not empty param.convite}">
+                    <input type="hidden" name="evento" value="<c:out value="${param.evento}"/>">
+                    <input type="hidden" name="convite" value="<c:out value="${param.convite}"/>">
+                </c:if>
                 <div class="campo">
                     <label class="acessivel" for="identificador-login">Usuário ou e-mail</label>
                     <input type="text" name="identificador" id="identificador-login" placeholder="Usuário ou e-mail" autocomplete="username" value="<c:out value="${param.identificador}"/>">
@@ -31,7 +35,7 @@
                 </div>
                 <div class="login-botoes">
                     <button class="botao" type="submit">Entrar</button>
-                    <a class="botao" href="/cadastro">Criar conta</a>
+                    <a class="botao" href="/cadastro<c:if test="${not empty param.evento and not empty param.convite}">?evento=<c:out value="${param.evento}"/>&amp;convite=<c:out value="${param.convite}"/></c:if>">Criar conta</a>
                 </div>
             </form>
         </div>
